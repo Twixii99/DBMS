@@ -14,5 +14,7 @@ public class Main {
         table.removeRecord("email","def@gmail.com");
         table.removeRecord("name","ABC");
         System.out.println(table);
+
+        System.out.println(table.schema());
     }
 }
