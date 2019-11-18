@@ -95,50 +95,50 @@ public class Table {
         return false;
     }
 
-    // returns Object[][] that
+
     // if headersToBeSelected = null then we select the whole table
-    public Object[][] select(String[] headersToBeSelected, String conditionHeader, Object targetValue, char relation) {
-        LinkedList<Object> selectedTable = new LinkedList<>();
-        int[] indexesOfHeaders = new int[headersToBeSelected.length]; // indexes of the headers to be displayed
-        boolean foundHeader = false;
-        int conditionHeaderIndex = 0;
-        for (int i = 0; i < headersToBeSelected.length; i++) {
-            for (int j = 0; j < headers.length; i++) {
-                if (!foundHeader && (headers[j].equalsIgnoreCase(conditionHeader))) {
-                    foundHeader = true;
-                    conditionHeaderIndex = j;
-                }
-                if (headersToBeSelected[i].equalsIgnoreCase(headers[j])) {
-                    indexesOfHeaders[i] = i;
-                    continue;
-                }
-            }
-        }
-
-        Iterator<Object[]> iterator = table.listIterator();
-        while (iterator.hasNext()) {
-            Object[] tempRecord = iterator.next();
-
-            // the condition to add to selected table
-            if (tempRecord[conditionHeaderIndex].equals(targetValue)) {
-                selectedTable.add(tempRecord);
-            }
-        }
-
-
-        Object[][] result = new Object[selectedTable.size()][headersToBeSelected.length];
-        Iterator<Object[]> iterator1 = (Iterator<Object[]>) selectedTable.listIterator();
-        int i = 0;
-        while (iterator.hasNext()){
-            Object[] tempRecord = iterator1.next();
-            int k = 0;
-            for (int j : indexesOfHeaders){
-                result[i][k++] = tempRecord[j];
-            }
-            i++;
-        }
-        return result;
-    }
+//    public Object[][] select(String[] headersToBeSelected, String conditionHeader, Object targetValue, char relation) {
+//        LinkedList<Object> selectedTable = new LinkedList<>();
+//        int[] indexesOfHeaders = new int[headersToBeSelected.length]; // indexes of the headers to be displayed
+//        boolean foundHeader = false;
+//        int conditionHeaderIndex = 0;
+//        for (int i = 0; i < headersToBeSelected.length; i++) {
+//            for (int j = 0; j < headers.length; i++) {
+//                if (!foundHeader && (headers[j].equalsIgnoreCase(conditionHeader))) {
+//                    foundHeader = true;
+//                    conditionHeaderIndex = j;
+//                }
+//                if (headersToBeSelected[i].equalsIgnoreCase(headers[j])) {
+//                    indexesOfHeaders[i] = i;
+//                    continue;
+//                }
+//            }
+//        }
+//
+//        Iterator<Object[]> iterator = table.listIterator();
+//        while (iterator.hasNext()) {
+//            Object[] tempRecord = iterator.next();
+//
+//            // the condition to add to selected table
+//            if (tempRecord[conditionHeaderIndex].equals(targetValue)) {
+//                selectedTable.add(tempRecord);
+//            }
+//        }
+//
+//
+//        Object[][] result = new Object[selectedTable.size()][headersToBeSelected.length];
+//        Iterator<Object[]> iterator1 = (Iterator<Object[]>) selectedTable.listIterator();
+//        int i = 0;
+//        while (iterator.hasNext()){
+//            Object[] tempRecord = iterator1.next();
+//            int k = 0;
+//            for (int j : indexesOfHeaders){
+//                result[i][k++] = tempRecord[j];
+//            }
+//            i++;
+//        }
+//        return result;
+//    }
 
     @Override
     public String toString() {
