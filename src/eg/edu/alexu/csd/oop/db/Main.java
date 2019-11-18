@@ -1,5 +1,7 @@
 package eg.edu.alexu.csd.oop.db;
 
+import java.util.Collections;
+
 public class Main {
     public static void main(String[] args) {
         Table table = new Table("contacts",new String[]{"name", "phone", "email"}, new String[]{"String", "Integer", "String"});
@@ -9,12 +11,20 @@ public class Main {
         table.updateRecord("phone",987654321,481926);
         table.updateRecord("name","abc" ,"ABC");
         table.add(new Object[]{"fido", 12304, "dog@email.com"});
-        System.out.println(table);
+//        System.out.println(table);
+//
+//        table.removeRecord("email","def@gmail.com");
+//        table.removeRecord("name","ABC");
+//        System.out.println(table);
+//
+//        System.out.println(table.schema());
 
-        table.removeRecord("email","def@gmail.com");
-        table.removeRecord("name","ABC");
-        System.out.println(table);
-
-        System.out.println(table.schema());
+        Object[][] arr = table.toArray();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(" " + arr[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 }

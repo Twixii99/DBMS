@@ -157,6 +157,36 @@ public class Table {
         return (stringBuilder.append(')').append(';')).toString();
     }
 
+    public Object[][] toArray(){
+        Object[][] arr = new Object[this.table.size()][this.headers.length];
+        Iterator<Object[]> iterator = this.table.listIterator();
+        int i = 0;
+        while (iterator.hasNext()){
+            Object[] record = iterator.next();
+            for (int j = 0 ; j < this.headers.length ; j++ ){
+                arr[i][j] = record[j];
+            }
+            i++;
+        }
+        return arr;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String[] getHeaders() {
+        return headers;
+    }
+
+    public String[] getTypes() {
+        return types;
+    }
+
+    public LinkedList<Object[]> getTable() {
+        return table;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("Table : ");
