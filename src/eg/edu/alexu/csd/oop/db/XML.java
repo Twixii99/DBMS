@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class XML {
-    public boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, String[]Labels) {
+    public static  boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, String[]Labels) {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
@@ -69,7 +69,7 @@ public class XML {
         return true;
     }
 
-    public LinkedList<LinkedList> convertFromXml(String dataBase, String table, Class[] types,String[] Labels) {
+    public static LinkedList<LinkedList> convertFromXml(String dataBase, String table, Class[] types,String[] Labels) {
         LinkedList<LinkedList> data = new LinkedList<>();
         try {
             File file = new File("Database\\" + dataBase + "\\" + table + "\\" + table + ".xml");
