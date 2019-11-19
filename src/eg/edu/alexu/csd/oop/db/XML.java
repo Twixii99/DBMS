@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class XML {
-    public boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, LinkedList<String> Labels) {
+    public boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, String[]Labels) {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
@@ -36,7 +36,7 @@ public class XML {
             rootElement.appendChild(row);
             int numberOfColumn = 0;
             for (Object object : linkedList) {
-                Attr attr = doc.createAttribute(Labels.get(numberOfColumn));
+                Attr attr = doc.createAttribute(Labels[numberOfColumn]);
                 attr.setValue(String.valueOf(object));
                 row.setAttributeNode(attr);
                 numberOfColumn++;
@@ -69,7 +69,7 @@ public class XML {
         return true;
     }
 
-    public LinkedList<LinkedList> convertFromXml(String dataBase, String table, List<Class> types, LinkedList<String> Labels) {
+    public LinkedList<LinkedList> convertFromXml(String dataBase, String table, Class[] types,String[] Labels) {
         LinkedList<LinkedList> data = new LinkedList<>();
         try {
             File file = new File("Database\\" + dataBase + "\\" + table + "\\" + table + ".xml");
@@ -82,19 +82,19 @@ public class XML {
                 Node nNode = nList.item(i);
                 LinkedList<Object> row = new LinkedList<>();
                 Element eElement = (Element) nNode;
-                for (int j = 0; j < Labels.size(); j++) {
-                    String str = eElement.getAttribute(Labels.get(j));
+                for (int j = 0; j < Labels.length; j++) {
+                    String str = eElement.getAttribute(Labels[j]);
                     if (str.equals("null")) {
                         row.add(null);
-                    } else if (types.get(j) == String.class) {
+                    } else if (types[j] == String.class) {
                         row.add(str);
-                    } else if (types.get(j) == int.class) {
+                    } else if (types[j] == int.class) {
                         row.add(Integer.parseInt(str));
-                    } else if (types.get(j) == boolean.class) {
+                    } else if (types[j] == boolean.class) {
                         row.add(Boolean.parseBoolean(str));
-                    } else if (types.get(j) == float.class) {
+                    } else if (types[j] == float.class) {
                         row.add(Float.parseFloat(str));
-                    } else if (types.get(j) == Double.class) {
+                    } else if (types[j] == Double.class) {
                         row.add(Double.parseDouble(str));
                     } else {
                         throw new Exception("not supported type");
