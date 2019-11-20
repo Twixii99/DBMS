@@ -2,6 +2,7 @@ package eg.edu.alexu.csd.oop.db;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 public class Table {
     private String name;
@@ -59,19 +60,25 @@ public class Table {
         return false;
     }
 
-    // returns false if it doesn't find the record
-    public boolean removeRecord(String header, Object value) {
-        int[] index = indexOf(header, value);
-        if (index[0] != -1) { // index of record != -1
-            table.remove(index[0]); // removed so the one after it is taking its place
-            return true;
+    // removes if the record matching the inputs in exist
+    public void removeRecord(String header, Object value) {
+        LinkedList<Integer> indexes = indexOf(header, value);
+        if (!indexes.isEmpty()){
+            Iterator<Object[]> iterator = table.listIterator();
+            while (iterator.hasNext() && !indexes.isEmpty()){
+                Object[] record = iterator.next();
+                if (indexes.contains((Integer) record[0])){
+                    indexes.remove((Integer) record[0]);
+                    iterator.remove();
+                }
+            }
         }
-        return false;
     }
 
-    // returns the index if the mentioned record "[index of record, index of header]"
-    private int[] indexOf(String header, Object value) {
+    // returns the innerIDs if the mentioned record
+    private LinkedList<Integer> indexOf(String header, Object value) {
         // find the index of the header in (the index of the column).
+        LinkedList<Integer> indexes = new LinkedList<>();
         int j = 0;
         boolean foundHeader = false;
         for (String s : headers) {
@@ -83,73 +90,39 @@ public class Table {
             break;
         }
         if (foundHeader) {
-            for (int i = 0; i < table.size(); i++) {
-                if (table.get(i)[j].equals(value)) {
-                    return new int[]{i, j};
+            for (Object[] record : table) {
+                if (record[j].equals(value)) {
+                    indexes.add((Integer) record[0]);
                 }
             }
         }
-        return new int[]{-1, -1};
+        return indexes;
     }
 
     // as you know that we only update value by value
-    public boolean updateRecord(String header, Object oldValue, Object newValue) {
-        int[] index = indexOf(header, oldValue);
-        if ((oldValue.getClass().equals(newValue.getClass())) && (index[0] != -1)) {
-//            if ((types[index[1]].equalsIgnoreCase("Integer") && (oldValue instanceof Integer)) ||
-//                    (types[index[1]].equalsIgnoreCase("String") && (oldValue instanceof String))) {
-//                // type of value checked
-//            }
-            Object[] tempRecord = table.get(index[0]).clone();
-            tempRecord[index[1]] = newValue;
-            table.set(index[0], tempRecord);
-            return true;
+    public void updateRecord(String header, Object oldValue, Object newValue) {
+        // get the index of header in headers
+        int j = 0;
+        for (j = 0 ; j < headers.length ; j++){
+            if (headers[j].equalsIgnoreCase(header)){
+                break;
+            }
         }
-        return false;
-    }
-
-//     if headersToBeSelected = null then we select the whole table
-    public Object[][] select(String[] headersToBeSelected, String conditionHeader, Object targetValue, char relation) {
-        LinkedList<Object[]> selectedTable = new LinkedList<>();
-        int[] indexesOfHeaders = new int[headersToBeSelected.length]; // indexes of the headers to be displayed
-        boolean foundHeader = false;
-        int conditionHeaderIndex = 0;
-        for (int i = 0; i < headersToBeSelected.length; i++) {
-            for (int j = 0; j < headers.length; i++) {
-                if (!foundHeader && (headers[j].equalsIgnoreCase(conditionHeader))) {
-                    foundHeader = true;
-                    conditionHeaderIndex = j;
-                }
-                if (headersToBeSelected[i].equalsIgnoreCase(headers[j])) {
-                    indexesOfHeaders[i] = i;
-                    continue;
+        // update the record(s) matching the inputs
+        LinkedList<Integer> indexes = indexOf(header, oldValue);
+        if ((oldValue.getClass().equals(newValue.getClass())) && (!indexes.isEmpty())) {
+            ListIterator<Object[]> iterator = table.listIterator();
+            while (iterator.hasNext() && !indexes.isEmpty()){
+                Object[] record = iterator.next();
+                if (indexes.contains((Integer) record[0])){
+                    indexes.remove((Integer) record[0]);
+                    Object[] newRecord = new Object[record.length];
+                    System.arraycopy(record,0,newRecord,0,record.length);
+                    newRecord[j] = newValue;
+                    iterator.set(newRecord);
                 }
             }
         }
-
-        Iterator<Object[]> iterator = table.listIterator();
-        while (iterator.hasNext()) {
-            Object[] tempRecord = iterator.next();
-
-            // the condition to add to selected table
-            if (tempRecord[conditionHeaderIndex].equals(targetValue)) {
-                selectedTable.add(tempRecord);
-            }
-        }
-
-
-        Object[][] result = new Object[selectedTable.size()][headersToBeSelected.length];
-        Iterator<Object[]> iterator1 = selectedTable.listIterator();
-        int i = 0;
-        while (iterator.hasNext()){
-            Object[] tempRecord = iterator1.next();
-            int k = 0;
-            for (int j : indexesOfHeaders){
-                result[i][k++] = tempRecord[j];
-            }
-            i++;
-        }
-        return result;
     }
 
     public String schema(){
@@ -175,9 +148,8 @@ public class Table {
         int i = 0;
         while (iterator.hasNext()){
             Object[] record = iterator.next();
-            for (int j = 1 ; j < this.headers.length ; j++ ){ // start from one so that we don't include the innerID with us
-                arr[i][j - 1] = record[j];
-            }
+            // start from one so that we don't include the innerID with us
+            if (this.headers.length - 1 >= 0) System.arraycopy(record, 1, arr[i], 0, this.headers.length - 1);
             i++;
         }
         return arr;
@@ -213,17 +185,21 @@ public class Table {
         return null;
     }
 
-    // get the order by which you added this record, and it returns -1 if record isn't found, or removed by now
-    public int getInnerID(String header, Object value){
-        int[] indexes = indexOf(header, value);
-        if (indexes[0] != -1){ // meaning, found the record
-            return (Integer) table.get(indexes[0])[0];
-        }
-        return -1;
+    // get the order by which you added this/there record(s), and returns empty linkedlist if it didn't find any suitable record
+    public LinkedList<Integer> getInnerID(String header, Object value){
+        return indexOf(header, value);
     }
 
     public void setHeadersVisible(boolean headersVisible) {
         this.headersVisible = headersVisible;
+    }
+
+    public void addAll(LinkedList<Object[]> subTable){
+        for (Object[] record : subTable) {
+            if (!add(record)) {
+                return;
+            }
+        }
     }
 
     @Override
