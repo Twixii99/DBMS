@@ -165,10 +165,18 @@ public class Table {
         return tempHeaders;
     }
 
-    public String[] getTypes() {
-        String[] tempTypes = new String[types.length - 1];
-        System.arraycopy(types, 1, tempTypes, 0,tempTypes.length);
-        return tempTypes;
+    public Class[] getTypes() {
+        Class[] typesClasses = new Class[types.length - 1];
+        for (int i = 1 ; i < types.length ; i++ ){
+            if (types[i].equalsIgnoreCase("String")){
+                typesClasses[i - 1] = String.class;
+            } else if (types[i].equalsIgnoreCase("Integer")){
+                typesClasses[i - 1] = Integer.class;
+            } else if (types[i].equalsIgnoreCase("Boolean")){
+                typesClasses[i - 1] = Boolean.class;
+            }
+        }
+        return typesClasses;
     }
 
     // order By Which The Record Is Added, returns null if not found ( was removed by now)
@@ -194,6 +202,7 @@ public class Table {
         this.headersVisible = headersVisible;
     }
 
+    // addes a linked list of record, till it sees an invalid one then it cancels out the operation
     public void addAll(LinkedList<Object[]> subTable){
         for (Object[] record : subTable) {
             if (!add(record)) {
@@ -201,6 +210,7 @@ public class Table {
             }
         }
     }
+
 
     @Override
     public String toString() {
