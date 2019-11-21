@@ -2,6 +2,7 @@ package eg.edu.alexu.csd.oop.db;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class DB implements Database {
@@ -27,10 +28,10 @@ public class DB implements Database {
     public Object[][] executeQuery(String query) throws SQLException {
         LinkedList<Object> references;
         String condition = query;
-        if (query.matches("(?i)^\\s*select\\s.+where\\s+.+\\s*;\\s*$")){
-            condition = condition.replaceAll("(?i)^\\s*select\\s.+where\\s+","").replaceAll("(?i)\\s*;\\s*$","");
-            condition.replaceFirst("^"," ");
-            query = query.replaceAll("(?i)where\\s+.+\\s*","");
+        if (query.matches("(?i)^\\s*select\\s.+where\\s+.+\\s*;\\s*$")) {
+            condition = condition.replaceAll("(?i)^\\s*select\\s.+where\\s+", "").replaceAll("(?i)\\s*;\\s*$", "");
+            condition.replaceFirst("^", " ");
+            query = query.replaceAll("(?i)where\\s+.+\\s*", "");
             // now we have a free where query
         }
         // in cass the user requested to select all the table with *
@@ -76,6 +77,27 @@ public class DB implements Database {
 
     public String getName() {
         return this.name;
+    }
+
+    public boolean containsTable(String tableName){
+        Iterator<Table> tableIterator = tables.listIterator();
+        while (tableIterator.hasNext()){
+            if(tableIterator.next().getName().equals(tableName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Table getTable(String tableName){
+        Iterator<Table> tableIterator = tables.listIterator();
+        while (tableIterator.hasNext()){
+            Table table = tableIterator.next();
+            if(table.getName().equals(tableName)){
+                return table;
+            }
+        }
+        return null;
     }
 
 }
