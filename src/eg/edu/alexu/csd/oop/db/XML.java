@@ -25,7 +25,11 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 public class XML {
-    public static boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, String[]Labels) {
+    public static boolean convertIntoXml(String DataBaseName , Table table) {
+
+        LinkedList<Object[]> data =table.getTable();
+        String TableName =table.getName();
+        String []Labels=table.getHeaders();
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
@@ -39,11 +43,11 @@ public class XML {
         Element rootElement = doc.createElement(DataBaseName);
         doc.appendChild(rootElement);
 
-        for (LinkedList linkedList : data) {
+        for (Object[] objects : data) {
             Element row = doc.createElement(TableName);
             rootElement.appendChild(row);
             int numberOfColumn = 0;
-            for (Object object : linkedList) {
+            for (Object object : objects) {
                 Element element = doc.createElement(Labels[numberOfColumn]);
                 element.appendChild(doc.createTextNode(String.valueOf(object)));
                 row.appendChild(element);
