@@ -1,6 +1,9 @@
 package eg.edu.alexu.csd.oop.db;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,10 +16,9 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.util.LinkedList;
-import java.util.List;
 
 public class XML {
-    public static  boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, String[]Labels) {
+    public static boolean convertIntoXml(LinkedList<LinkedList> data, String DataBaseName, String TableName, String[]Labels) {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
@@ -27,7 +29,6 @@ public class XML {
             return false;
         }
         Document doc = dBuilder.newDocument();
-
         Element rootElement = doc.createElement(DataBaseName);
         doc.appendChild(rootElement);
 
@@ -36,9 +37,9 @@ public class XML {
             rootElement.appendChild(row);
             int numberOfColumn = 0;
             for (Object object : linkedList) {
-                Attr attr = doc.createAttribute(Labels[numberOfColumn]);
-                attr.setValue(String.valueOf(object));
-                row.setAttributeNode(attr);
+                Element element = doc.createElement(Labels[numberOfColumn]);
+                element.appendChild(doc.createTextNode(String.valueOf(object)));
+                row.appendChild(element);
                 numberOfColumn++;
             }
         }
@@ -52,13 +53,8 @@ public class XML {
             return false;
         }
         DOMSource source = new DOMSource(doc);
-        File file = new File("DataBase");
-        file.mkdirs();
-        file = new File("Database\\" + DataBaseName);
-        file.mkdirs();
-        file = new File("Database\\" + DataBaseName + "\\" + TableName);
-        file.mkdirs();
 
+        MakeDirectory(DataBaseName,TableName);
         StreamResult result = new StreamResult(new File("Database\\" + DataBaseName + "\\" + TableName + "\\" + TableName + ".xml"));
         try {
             transformer.transform(source, result);
@@ -69,7 +65,7 @@ public class XML {
         return true;
     }
 
-    public static LinkedList<LinkedList> convertFromXml(String dataBase, String table, Class[] types,String[] Labels) {
+    public static LinkedList<LinkedList> convertFromXml(String dataBase, String table, Class[] types) {
         LinkedList<LinkedList> data = new LinkedList<>();
         try {
             File file = new File("Database\\" + dataBase + "\\" + table + "\\" + table + ".xml");
@@ -82,33 +78,43 @@ public class XML {
                 Node nNode = nList.item(i);
                 LinkedList<Object> row = new LinkedList<>();
                 Element eElement = (Element) nNode;
-                for (int j = 0; j < Labels.length; j++) {
-                    String str = eElement.getAttribute(Labels[j]);
-                    if (str.equals("null")) {
-                        row.add(null);
-                    } else if (types[j] == String.class) {
+                NodeList nodeList =eElement.getChildNodes();
+                for (int j = 0; j < eElement.getChildNodes().getLength(); j++) {
+                    String str = nodeList.item(j).getTextContent();
+                   if (types[j] == String.class) {
                         row.add(str);
-                    } else if (types[j] == int.class) {
+                    } else if (types[j] == int.class||types[j] == Integer.class) {
                         row.add(Integer.parseInt(str));
-                    } else if (types[j] == boolean.class) {
+                    } else if (types[j] == boolean.class||types[j] == Boolean.class) {
                         row.add(Boolean.parseBoolean(str));
-                    } else if (types[j] == float.class) {
-                        row.add(Float.parseFloat(str));
-                    } else if (types[j] == Double.class) {
-                        row.add(Double.parseDouble(str));
                     } else {
                         throw new Exception("not supported type");
                     }
 
-                    System.out.println(str);
                 }
                 data.add(row);
-
             }
-
         } catch (Exception e) {
             System.out.println(e);
+            e.printStackTrace();
         }
         return data;
+    }
+
+    public static void MakeDirectory( String DataBaseName , String  TableName){
+        File file;
+        if(System.getProperty("DataBase")==null) {
+            file = new File("DataBase");
+            file.mkdirs();
+        }
+        if(System.getProperty("Database\\" + DataBaseName)==null) {
+            file = new File("Database\\" + DataBaseName);
+            file.mkdirs();
+
+        }
+        if(System.getProperty("Database\\" + DataBaseName + "\\" + TableName)==null) {
+            file = new File("Database\\" + DataBaseName + "\\" + TableName);
+            file.mkdirs();
+        }
     }
 }
