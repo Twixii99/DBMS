@@ -17,10 +17,10 @@ public class Table {
         // adding innerID column to the table
         String[] tempHeaders = new String[headers.length + 1];
         tempHeaders[0] = "innerID";
-        System.arraycopy(headers,0,tempHeaders,1,headers.length);
+        System.arraycopy(headers, 0, tempHeaders, 1, headers.length);
         String[] tempTypes = new String[types.length + 1];
         tempTypes[0] = "Integer";
-        System.arraycopy(types,0,tempTypes,1,types.length);
+        System.arraycopy(types, 0, tempTypes, 1, types.length);
         this.headers = tempHeaders;
         this.types = tempTypes;
         this.lastRecordId = 0;
@@ -33,7 +33,7 @@ public class Table {
         if (checkRecordFormat(record)) {
             Object[] tempRecord = new Object[record.length + 1];
             tempRecord[0] = lastRecordId++;
-            System.arraycopy(record,0,tempRecord,1,record.length);
+            System.arraycopy(record, 0, tempRecord, 1, record.length);
             table.add(tempRecord);
             return true;
         }
@@ -52,6 +52,10 @@ public class Table {
                     if (!(record[i] instanceof String)) {
                         return false;
                     }
+                } else if ((types[i + 1].equalsIgnoreCase("Boolean"))){
+                    if (!(record[i] instanceof Boolean)) {
+                        return false;
+                    }
                 }
             }
             // format checked
@@ -63,11 +67,11 @@ public class Table {
     // removes if the record matching the inputs in exist
     public void removeRecord(String header, Object value) {
         LinkedList<Integer> indexes = indexOf(header, value);
-        if (!indexes.isEmpty()){
+        if (!indexes.isEmpty()) {
             Iterator<Object[]> iterator = table.listIterator();
-            while (iterator.hasNext() && !indexes.isEmpty()){
+            while (iterator.hasNext() && !indexes.isEmpty()) {
                 Object[] record = iterator.next();
-                if (indexes.contains((Integer) record[0])){
+                if (indexes.contains((Integer) record[0])) {
                     indexes.remove((Integer) record[0]);
                     iterator.remove();
                 }
@@ -103,8 +107,8 @@ public class Table {
     public void updateRecord(String header, Object oldValue, Object newValue) {
         // get the index of header in headers
         int j = 0;
-        for (j = 0 ; j < headers.length ; j++){
-            if (headers[j].equalsIgnoreCase(header)){
+        for (j = 0; j < headers.length; j++) {
+            if (headers[j].equalsIgnoreCase(header)) {
                 break;
             }
         }
@@ -112,12 +116,12 @@ public class Table {
         LinkedList<Integer> indexes = indexOf(header, oldValue);
         if ((oldValue.getClass().equals(newValue.getClass())) && (!indexes.isEmpty())) {
             ListIterator<Object[]> iterator = table.listIterator();
-            while (iterator.hasNext() && !indexes.isEmpty()){
+            while (iterator.hasNext() && !indexes.isEmpty()) {
                 Object[] record = iterator.next();
-                if (indexes.contains((Integer) record[0])){
+                if (indexes.contains((Integer) record[0])) {
                     indexes.remove((Integer) record[0]);
                     Object[] newRecord = new Object[record.length];
-                    System.arraycopy(record,0,newRecord,0,record.length);
+                    System.arraycopy(record, 0, newRecord, 0, record.length);
                     newRecord[j] = newValue;
                     iterator.set(newRecord);
                 }
@@ -125,28 +129,28 @@ public class Table {
         }
     }
 
-    public String schema(){
-         StringBuilder stringBuilder = new StringBuilder("CREATE TABLE ");
-         stringBuilder.append(this.name).append(" VALUES(");
-         for (int i = 1 ; i < headers.length ; i++){ // start from 1 so that we don't include the innerID with us
-             stringBuilder.append(this.headers[i]).append(' ');
-             if (types[i].equalsIgnoreCase("Integer")){
-                 stringBuilder.append("int").append(' ');
-             } else if (types[i].equalsIgnoreCase("String")){
-                 stringBuilder.append("varchar").append(' ');
-             }
-             if ((i < headers.length - 1)){
-                 stringBuilder.append(',');
-             }
-         }
+    public String schema() {
+        StringBuilder stringBuilder = new StringBuilder("CREATE TABLE ");
+        stringBuilder.append(this.name).append(" VALUES(");
+        for (int i = 1; i < headers.length; i++) { // start from 1 so that we don't include the innerID with us
+            stringBuilder.append(this.headers[i]).append(' ');
+            if (types[i].equalsIgnoreCase("Integer")) {
+                stringBuilder.append("int").append(' ');
+            } else if (types[i].equalsIgnoreCase("String")) {
+                stringBuilder.append("varchar").append(' ');
+            }
+            if ((i < headers.length - 1)) {
+                stringBuilder.append(',');
+            }
+        }
         return (stringBuilder.append(')').append(';')).toString();
     }
 
-    public Object[][] toArray(){
+    public Object[][] toArray() {
         Object[][] arr = new Object[this.table.size()][this.headers.length - 1];
         Iterator<Object[]> iterator = this.table.listIterator();
         int i = 0;
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             Object[] record = iterator.next();
             // start from one so that we don't include the innerID with us
             if (this.headers.length - 1 >= 0) System.arraycopy(record, 1, arr[i], 0, this.headers.length - 1);
@@ -161,18 +165,18 @@ public class Table {
 
     public String[] getHeaders() {
         String[] tempHeaders = new String[headers.length - 1];
-        System.arraycopy(headers, 1, tempHeaders, 0,tempHeaders.length);
+        System.arraycopy(headers, 1, tempHeaders, 0, tempHeaders.length);
         return tempHeaders;
     }
 
     public Class[] getTypes() {
         Class[] typesClasses = new Class[types.length - 1];
-        for (int i = 1 ; i < types.length ; i++ ){
-            if (types[i].equalsIgnoreCase("String")){
+        for (int i = 1; i < types.length; i++) {
+            if (types[i].equalsIgnoreCase("String")) {
                 typesClasses[i - 1] = String.class;
-            } else if (types[i].equalsIgnoreCase("Integer")){
+            } else if (types[i].equalsIgnoreCase("Integer")) {
                 typesClasses[i - 1] = Integer.class;
-            } else if (types[i].equalsIgnoreCase("Boolean")){
+            } else if (types[i].equalsIgnoreCase("Boolean")) {
                 typesClasses[i - 1] = Boolean.class;
             }
         }
@@ -180,13 +184,13 @@ public class Table {
     }
 
     // order By Which The Record Is Added, returns null if not found ( was removed by now)
-    public Object[] getRecord(int innerID){
+    public Object[] getRecord(int innerID) {
         Iterator<Object[]> iterator = table.listIterator(0);
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             Object[] record = iterator.next();
-            if (((Integer) record[0]) == innerID){
+            if (((Integer) record[0]) == innerID) {
                 Object[] tempRecord = new Object[record.length - 1];
-                System.arraycopy(record,1,tempRecord,0,tempRecord.length);
+                System.arraycopy(record, 1, tempRecord, 0, tempRecord.length);
                 return tempRecord;
             }
         }
@@ -194,7 +198,7 @@ public class Table {
     }
 
     // get the order by which you added this/there record(s), and returns empty linkedlist if it didn't find any suitable record
-    public LinkedList<Integer> getInnerID(String header, Object value){
+    public LinkedList<Integer> getInnerID(String header, Object value) {
         return indexOf(header, value);
     }
 
@@ -202,25 +206,36 @@ public class Table {
         this.headersVisible = headersVisible;
     }
 
-    // addes a linked list of record, till it sees an invalid one then it cancels out the operation
-    public void addAll(LinkedList<Object[]> subTable){
+    // adds a linked list of record, till it sees an invalid one then it cancels out the operation
+    public void addAll(LinkedList<Object[]> subTable) {
         for (Object[] record : subTable) {
             if (!add(record)) {
                 return;
             }
         }
     }
-    
-    public LinkedList<Object[]> getTable() {
-        return table;
-    }
 
+    public LinkedList<Object[]> getTable() {
+        LinkedList<Object[]> list = new LinkedList<>();
+        Iterator<Object[]> iterator = this.table.listIterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            Object[] record = iterator.next();
+            Object[] tempRecord = new Object[record.length - 1];
+            // start from one so that we don't include the innerID with us
+            if (this.headers.length - 1 >= 0)
+                System.arraycopy(record, 1, tempRecord, 0, this.headers.length - 1);
+            list.add(tempRecord);
+            i++;
+        }
+        return list;
+    }
 
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("Table : ");
         stringBuilder.append(this.name).append('\n');
-        if (headersVisible){
+        if (headersVisible) {
             for (int i = 1; i < headers.length; i++) {
                 stringBuilder.append(headers[i]).append((i < headers.length - 1) ? ('|') : ('\n'));
             }
