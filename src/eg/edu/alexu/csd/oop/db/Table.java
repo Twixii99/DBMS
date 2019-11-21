@@ -210,6 +210,10 @@ public class Table {
             }
         }
     }
+    
+    public LinkedList<Object[]> getTable() {
+        return table;
+    }
 
 
     @Override
