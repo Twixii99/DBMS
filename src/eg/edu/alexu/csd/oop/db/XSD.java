@@ -13,9 +13,10 @@ import java.util.regex.Pattern;
 public class XSD {
     private static LinkedList<String> Labels=new LinkedList();
     private static LinkedList<Class> TYPES=new LinkedList();
-    public static void MakeXsd(String databaseName, String table, String[] Labels, Class[] Types)  {
-    XML.MakeDirectory(databaseName,table);
-      File dbfile=new File("Database"+ System.getProperty("file.separator") + databaseName +  System.getProperty("file.separator") + table +  System.getProperty("file.separator")+ table + ".xsd");
+    public static void MakeXsd(String databaseName, Table tables)  {
+
+    XML.MakeDirectory(databaseName,tables.getName());
+      File dbfile=new File("Database"+ System.getProperty("file.separator") + databaseName +  System.getProperty("file.separator") + tables.getName() +  System.getProperty("file.separator")+ tables.getName() + ".xsd");
       try {
           dbfile.createNewFile();
       } catch (IOException e) {
@@ -27,12 +28,12 @@ public class XSD {
           StringBuilder str=new StringBuilder("");
 
 
-          String s=getBeginOfXsd(databaseName,table);
+          String s=getBeginOfXsd(databaseName,tables.getName());
           str.append(s);
           writer.write(s);
 
 
-          s=getDataXsd(Labels,Types);
+          s=getDataXsd(tables.getHeaders(),tables.getTypes());
           writer.write(s);
 
 
