@@ -13,9 +13,9 @@ import java.util.regex.Pattern;
 public class XSD {
     private static LinkedList<String> Labels=new LinkedList();
     private static LinkedList<Class> TYPES=new LinkedList();
-  public static void MakeXsd(String databaseName, String table, String[] Labels, Class[] Types)  {
-   XML.MakeDirectory(databaseName,table);
-      File dbfile=new File("Database\\" + databaseName + "\\" + table + "\\" + table + ".xsd");
+    public static void MakeXsd(String databaseName, String table, String[] Labels, Class[] Types)  {
+    XML.MakeDirectory(databaseName,table);
+      File dbfile=new File("Database"+ System.getProperty("file.separator") + databaseName +  System.getProperty("file.separator") + table +  System.getProperty("file.separator")+ table + ".xsd");
       try {
           dbfile.createNewFile();
       } catch (IOException e) {
@@ -54,7 +54,7 @@ public class XSD {
 
   Labels=new LinkedList<>();
   TYPES=new LinkedList<>();
-       String str = new String(Files.readAllBytes(Paths.get(new File("Database\\" + DB_NAME + "\\" + Table + "\\" + Table + ".xsd").getAbsolutePath())));
+       String str = new String(Files.readAllBytes(Paths.get(new File("Database"+ System.getProperty("file.separator") + DB_NAME +  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
 
        Pattern pattern=Pattern.compile("(.*)(<xs:complexType name = '"+Table+"'>)(.*)");
 
@@ -81,7 +81,9 @@ public class XSD {
        }else throw new EOFException("ERROR FORMAT XSD FILE");
     }
 
-   public  static String[] GetNames(){
+
+
+    public  static String[] GetNames(){
       String s[]=new String[Labels.size()];
       int i=0;
       for(String str:Labels){
@@ -143,7 +145,8 @@ public class XSD {
     private static String getDataXsd(String[] labels, Class[] types) throws Exception
     {
       StringBuilder stringBuilder =new StringBuilder("");
-      for(int i=0;i<labels.length;i++){
+      for(int i=0;i<labels.length;i++)
+      {
           String s=getRecord(labels[i],types[i]);
           stringBuilder.append(s);
       }
