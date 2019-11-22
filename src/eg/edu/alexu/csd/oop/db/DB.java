@@ -33,15 +33,23 @@ public class DB implements Database {
         String tableName = (String) result.get(1);
         String condition = (String) result.get(2);
         LinkedList<String> headers = new LinkedList<>(Arrays.asList(getTable(tableName).getHeaders()));
+        if (columns.getFirst().equals("*")){
+            columns = headers;
+        }
         // when ahmed finished it
-        Mark mark = new Mark();
-
         LinkedList<Object> references = new LinkedList<>();
-        try{
-            references = (LinkedList<Object>) mark.GetData(condition,getTable(tableName));
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-            return null;
+        if (!condition.equals("")){
+            Mark mark = new Mark();
+            try{
+                references = (LinkedList<Object>) mark.GetData(condition,getTable(tableName));
+            } catch (Exception e){
+                System.out.println(e.getMessage());
+                return null;
+            }
+        } else {
+            for (Object record : getTable(tableName).getTable()){
+                references.add(record);
+            }
         }
         Object[][] arr  = new Object[references.size()][columns.size()];
         LinkedList<Integer> columnsIndexes = new LinkedList<>();
