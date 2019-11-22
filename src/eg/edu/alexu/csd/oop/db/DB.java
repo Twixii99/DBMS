@@ -1,11 +1,13 @@
 package eg.edu.alexu.csd.oop.db;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
 public class DB implements Database {
     private String name;
     private LinkedList<Table> tables = new LinkedList<>();
+    private String directoryOfDataBases = "DataBase";
 
     public DB(String name) {
         this.name = name;
@@ -14,13 +16,77 @@ public class DB implements Database {
 
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
-        return null;
+        File directory = new File(directoryOfDataBases);
+        //directory for all existed databases
+        for(String x  : Objects.requireNonNull(directory.list())){ //loop on all existed db
+            boolean equals = x.toLowerCase().equals(databaseName.toLowerCase());
+            if( equals && !dropIfExists ){ //if exist and not drop >> use it
+                this.name = x;
+                return "existAndUse";
+            }
+            if( equals ){ //if exist and drop >> drop the old then create new one and use it
+                dropDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName);
+                createDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName);
+                this.name = databaseName;
+                return "droppedAndCreateNew";
+            }
+        }
+
+        createDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName); //if not exists create it
+        this.name = databaseName;
+        return "notExistAndCreated";
+    }
+
+    private void dropDirectory(String path){ //this function can delete a directory and all its contents
+        File oldData = new File(path);
+        String[]entries = oldData.list();
+        for (String s : Objects.requireNonNull(entries)) {
+            File currentFile = new File(oldData.getPath(), s);
+            if (currentFile.isDirectory()) dropDirectory(currentFile.getPath());
+            currentFile.delete();
+        }
+        oldData.delete();
+    }
+    private void createDirectory(String path){ //this function creates a directory witt this path
+        File directory = new File(path);
+        directory.mkdir();
     }
 
     @Override
     public boolean executeStructureQuery(String query) throws SQLException {
-        System.out.println("executeStructureQuery called");
-        return false;
+        if(query.matches("^create")) { //starts with create
+            LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
+            if (resultOfQuery == null) throw new SQLException("Wrong Drop command");
+            if ((Boolean) resultOfQuery.get(0)) { //create DataBase
+                String dataName = (String) resultOfQuery.get(1);
+                Boolean drop = (Boolean) resultOfQuery.get(2);
+                createDatabase(dataName, drop);
+            } else { //create a table
+                String tableName = (String) resultOfQuery.get(1);
+                String[] namesOfColumns = (String[]) resultOfQuery.get(3);
+                String[] types = (String[]) resultOfQuery.get(4);
+                Table t = new Table(tableName, namesOfColumns, types);
+                addTable(t);
+                XML.convertIntoXml(name, t);
+            }
+        }
+        else { //starts with drop
+            LinkedList<Object> resultOfQuery = Parser.parseDrop(query);
+            if (resultOfQuery == null) throw new SQLException("Wrong Drop command");
+
+            if ((Boolean) resultOfQuery.get(0)) { //drop DataBase
+                String dataName = (String) resultOfQuery.get(1);
+                dropDirectory(directoryOfDataBases+System.getProperty("file.separator")+dataName);
+            } else { //drop a table
+                String tableName = (String) resultOfQuery.get(1);
+                Table t = getTable(tableName);
+                if (t == null ) throw new SQLException("table name not exist!");
+                removeTable(t);
+                dropDirectory(directoryOfDataBases+System.getProperty("file.separator")+
+                        name+System.getProperty("file.separator")+tableName);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -87,7 +153,7 @@ public class DB implements Database {
         return false;
     }
 
-    public Table getTable(String tableName){
+    private Table getTable(String tableName){
         Iterator<Table> tableIterator = tables.listIterator();
         while (tableIterator.hasNext()){
             Table table = tableIterator.next();
@@ -98,8 +164,11 @@ public class DB implements Database {
         return null;
     }
 
-    public void addTable (Table table){
+    private void addTable (Table table){
         this.tables.add(table);
+    }
+    private void removeTable (Table table){
+        this.tables.remove(table);
     }
 
 }
