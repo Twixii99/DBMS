@@ -1,10 +1,7 @@
 package eg.edu.alexu.csd.oop.db;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 public class DB implements Database {
     private String name;
@@ -44,23 +41,22 @@ public class DB implements Database {
             references = (LinkedList<Object>) mark.GetData(condition,getTable(tableName));
         } catch (Exception e){
             System.out.println(e.getMessage());
+            return null;
         }
+        Object[][] arr  = new Object[references.size()][columns.size()];
         LinkedList<Integer> columnsIndexes = new LinkedList<>();
-        for (Object reference : references){
-            for (String column : columns){
-                if (headers.contains(column)){
-                    columnsIndexes.add(headers.indexOf(column));
+        for (String column : columns){
+            columnsIndexes.add(headers.indexOf(column));
+        } // now i have the indexes of the columns to be selected
+        for (int j = 0 ; j < headers.size() ; j++){
+            if (columnsIndexes.contains(j)){ // j is a column to be selected
+                int i = 0;
+                for (Object record : references){ // i is an index of a record selected
+                    arr[i++][j] = ((Object[]) record)[j];
                 }
             }
         }
-        Object[][] array = new Object[references.size()][columnsIndexes.size()];
-        for (int i = 0; i < references.size(); i++) {
-            int j = 0;
-            for (Integer index : columnsIndexes){
-                array[i][j++] = ((Object[]) references.get(i))[index];
-            }
-        }
-        return array;
+        return arr;
     }
 
     @Override
