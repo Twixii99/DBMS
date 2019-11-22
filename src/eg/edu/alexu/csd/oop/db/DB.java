@@ -21,12 +21,13 @@ public class DB implements Database {
 
     @Override
     public boolean executeStructureQuery(String query) throws SQLException {
+        System.out.println("executeStructureQuery called");
         return false;
     }
 
     @Override
     public Object[][] executeQuery(String query) throws SQLException {
-        LinkedList<Object> references;
+        /*LinkedList<Object> references;
         String condition = query;
         if (query.matches("(?i)^\\s*select\\s.+where\\s+.+\\s*;\\s*$")) {
             condition = condition.replaceAll("(?i)^\\s*select\\s.+where\\s+", "").replaceAll("(?i)\\s*;\\s*$", "");
@@ -66,12 +67,40 @@ public class DB implements Database {
             }
             System.out.println("can't find the requested table");
             return null;
+        }*/
+        LinkedList<Object> result = Parser.parseSelect(query);
+        if (result == null){
+            throw new SQLException("wrong input format");
         }
+        LinkedList<String> columns = (LinkedList<String>) Arrays.asList((String[]) result.get(0)); 
+        String tableName = (String) result.get(1);
+        String condition = (String) result.get(2);
+        LinkedList<String> headers = (LinkedList<String>) Arrays.asList(getTable(tableName).getHeaders());
+        // when ahmed finished it
+/*        LinkedList<Object> references = mark(getTable(tableName), condition);
+        LinkedList<Integer> columnsIndexes = new LinkedList<>();
+        for (Object reference : references){
+            reference = (Object[]) reference;
+            for (String column : columns){
+                if (headers.contains(column)){
+                    columnsIndexes.add(headers.indexOf(column));
+                }
+            }
+        }
+        Object[][] array = new Object[references.size()][columnsIndexes.size()];
+        for (int i = 0; i < references.size(); i++) {
+            int j = 0;
+            for (Integer index : columnsIndexes){
+                array[i][j++] = ((Object[]) references.get(i))[index];
+            }
+        }
+        return array;*/
         return new Object[0][];
     }
 
     @Override
     public int executeUpdateQuery(String query) throws SQLException {
+        System.out.println("executeUpdateQuery");
         return 0;
     }
 
