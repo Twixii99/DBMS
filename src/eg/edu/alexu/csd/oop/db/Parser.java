@@ -59,7 +59,7 @@ public class Parser {
             } else {
                 return "no database in use";
             }
-        } else if (query.matches("(?i)^\\s*UPDATE\\s+.+$")){
+        } else if (query.matches("(?i)^\\s*UPDATE\\s+.+$")) {
             // we are dealing with delete statement
             if (currentDataBase != null) {
                 currentDataBase.executeUpdateQuery(query);
@@ -86,7 +86,7 @@ public class Parser {
      * returns null if the query doesn't match
      */
     public static LinkedList<Object> parseCreate(String query) throws SQLException {
-        if (query.matches("(?i)^\\s*CREATE.+$")){
+        if (query.matches("(?i)^\\s*CREATE.+$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
             query1 = query1.replaceAll("(?i)^\\s*CREATE\\s+", "");
@@ -96,7 +96,7 @@ public class Parser {
                 query1 = query1.replaceAll("(?i)^\\s*DATABASE\\s+", "");
                 if (query1.matches("^\\s*\\w+\\s*;\\s*$")) {
                     // for databases creation, for example "create database databasename1;"
-                    String dataBaseName = query1.replaceAll("\\s*;\\s*$", "");
+                    String dataBaseName = query1.replaceAll("\\s*$", "");
                     result.add(dataBaseName);
                     result.add(false);
                     if (containsDataBase(dataBaseName)) {
@@ -108,10 +108,9 @@ public class Parser {
                         currentDataBase = newDataBase;
                     }
                     return result;
-                }
-                else if (query1.matches("(?i)^\\s*\\w+\\s+DROP\\s+IF\\s+EXIST\\s*;\\s*$")) {
+                } else if (query1.matches("(?i)^\\s*\\w+\\s+DROP\\s+IF\\s+EXIST\\s*$")) {
                     // for example "create database IF NOT EXIST batabase1;"
-                    String dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*;\\s*$", "");
+                    String dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
                     result.add(dataBaseName);
                     query1 = "create database " + dataBaseName + " drop if exist;";
                     if (containsDataBase(dataBaseName)) {
@@ -134,16 +133,16 @@ public class Parser {
                 // example: "create table table_name values ( names varchar, phone int, email varchar);"
                 result.add(false);
                 String tableName = query1;
-                tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s+VALUES.+\\s*;\\s*$", "");
+                tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s+VALUES.+\\s*$", "");
                 result.add(tableName);
                 result.add(false);
-                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "\\s+VALUES\\s*[(]\\s*", "").replaceAll("\\s*[)]\\s*;\\s*$", "").split(",");
+                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "\\s+VALUES\\s*[(]\\s*", "").replaceAll("\\s*[)]\\s*$", "").split(",");
                 // dataStyle will look like "[name varchar, phone int, email varchar]"
                 String[] headers = new String[dataStyle.length];
                 Class[] types = new Class[dataStyle.length];
                 if (validateTableStyle(dataStyle)) {
-                    for (int i = 0 ; i < dataStyle.length ; i++){
-                        String[] temp = dataStyle[i].replaceAll("^\\s+","").replaceAll("\\s+$","").split("\\s+");
+                    for (int i = 0; i < dataStyle.length; i++) {
+                        String[] temp = dataStyle[i].replaceAll("^\\s+", "").replaceAll("\\s+$", "").split("\\s+");
                         headers[i] = temp[0];
                         if (temp[1].equalsIgnoreCase("varchar")) {
                             types[i] = String.class;
@@ -172,7 +171,7 @@ public class Parser {
      * returns null if the query doesn't match
      */
     private LinkedList<Object> parseDrop(String query) throws SQLException {
-        if (query.matches("(?i)^\\s*DROP\\s+.+\\s*;\\s*$")){
+        if (query.matches("(?i)^\\s*DROP\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
             query1 = query1.replaceAll("(?i)^\\s*Drop\\s+", "");
@@ -180,7 +179,7 @@ public class Parser {
                 // we are dealing with database dropping
                 // example: "DROP DATABASE database_name;"
                 result.add(true);
-                String dataBaseName = query1.replaceAll("(?i)^\\s*DATABASE\\s+", "").replaceAll("(?i)\\s*;\\s*$", "");
+                String dataBaseName = query1.replaceAll("(?i)^\\s*DATABASE\\s+", "").replaceAll("(?i)\\s*$", "");
                 result.add(dataBaseName);
                 if (containsDataBase(dataBaseName)) {
                     // the database exist then
@@ -189,11 +188,11 @@ public class Parser {
                         dataBases.remove(selectedDataBase);
                     }
                 }
-            } else if (query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*;\\s*$")) {
+            } else if (query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*$")) {
                 // we are dealing with table dropping
                 // example: "DROP TABLE table_name;"
                 result.add(false);
-                String tableName = query1.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s*;\\s*$", "");
+                String tableName = query1.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s*$", "");
                 result.add(tableName);
             }
             return result;
@@ -213,54 +212,20 @@ public class Parser {
      */
     public static LinkedList<Object> parseInsert(String query) {
         // example: "insert into table_name (column1 ,column2, column3) values (value1, value2, value3);"
-        if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(].*[)]\\s*VALUES\\s*[(].+[)]\\s*;\\s*$")) {
+        if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(].*[)]\\s*VALUES\\s*[(].+[)]\\s*$")) {
             String query1 = query;
-            String tableName = query1.replaceAll("(?i)^\\s*INSERT\\s+INTO\\s+", "").replaceAll("(?i)\\s*[(].*[)]\\s*VALUES\\s*[(].+[)]\\s*;\\s*$", "");
+            String tableName = query1.replaceAll("(?i)^\\s*INSERT\\s+INTO\\s+", "").replaceAll("(?i)\\s*[(].*[)]\\s*VALUES\\s*[(].+[)]\\s*$", "");
             query1 = query;
-            String[] headers = removeSpaces(query1.replaceAll("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(]\\s*", "").replaceAll("(?i)[)]\\s*VALUES\\s*[(].+[)]\\s*;\\s*$", "").split(","));
+            String[] headers = removeSpaces(query1.replaceAll("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(]\\s*", "").replaceAll("(?i)[)]\\s*VALUES\\s*[(].+[)]\\s*$", "").split(","));
             // headers are for example: "column1,column2,column3".
             query1 = query;
-            String[] values = removeSpaces(query1.replaceAll("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(].*[)]\\s*VALUES\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*;\\s*$", "").split(","));
+            String[] values = removeSpaces(query1.replaceAll("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(].*[)]\\s*VALUES\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*$", "").split(","));
             // values are for example: "value1,value2,value3".
-            Table currentTable = currentDataBase.getTable(tableName);
-            String[] array = currentTable.getHeaders();
-            Class[] classes = currentTable.getTypes();
-            LinkedList<Integer> indexes = new LinkedList<>(); // indexes of the given columns(headers)
-            for (int i = 0; i < array.length; i++) {
-                for (String header : headers) {
-                    if (array[i].equals(header)) {
-                        indexes.add(i);
-                        break;
-                    }
-                }
-            }
-            int j = 0;
-            boolean validTypes = true;
-            for (Integer i : indexes) {
-                if ((classes[i] == String.class) && (!values[j++].equals("varchar"))) {
-                    validTypes = false;
-                    break;
-                } else if ((classes[i] == Integer.class) && (!values[j++].equals("int"))) {
-                    validTypes = false;
-                    break;
-
-                } else if ((classes[i] == Boolean.class) && (!values[j++].equals("bool"))) {
-                    validTypes = false;
-                    break;
-                }
-            }
-            // validate the types
-            if ((values.length == headers.length) &&
-                    (Arrays.asList(currentTable.getHeaders()).containsAll(Arrays.asList(headers))) &&
-                    (validTypes)) {
-                // the statement is valid
-                LinkedList<Object> result = new LinkedList<>();
-                result.add(tableName);
-                result.add(headers);
-                result.add(values);
-                return result;
-
-            }
+            LinkedList<Object> result = new LinkedList<>();
+            result.add(tableName);
+            result.add(headers);
+            result.add(values);
+            return result;
         }
         return null;
     }
@@ -277,29 +242,29 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseSelect(String query){
-        if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s+.+\\s*;\\s*$")){
+    public static LinkedList<Object> parseSelect(String query) {
+        if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             // don't know if it contains where or not
-            query = query.replaceAll("(?i)^\\s*SELECT\\s+","").replaceAll("(?i)\\s*;\\s*$","");
+            query = query.replaceAll("(?i)^\\s*SELECT\\s+", "").replaceAll("(?i)\\s*$", "");
             String query1 = query;
-            String requiredColumns = query1.replaceAll("(?i)\\s+FROM.+$","");
-            if (requiredColumns.matches("^\\s*[*]\\s*$")){
+            String requiredColumns = query1.replaceAll("(?i)\\s+FROM.+$", "");
+            if (requiredColumns.matches("^\\s*[*]\\s*$")) {
                 // meaning we "SELECT * FORM table_name;".
                 result.add(new String[]{"*"});
             } else {
                 // something like "column1, column2".
                 result.add(removeSpaces(requiredColumns.split(",")));
             }
-            if (query.matches("(?i)^.+WHERE.+$")){
+            if (query.matches("(?i)^.+WHERE.+$")) {
                 // contains where
-                String tableName = query1.replaceAll("(?i)^.+FROM\\s+","").replaceAll("(?i)\\s+WHERE.+$","");
+                String tableName = query1.replaceAll("(?i)^.+FROM\\s+", "").replaceAll("(?i)\\s+WHERE.+$", "");
                 result.add(tableName);
-                String condition = query1.replaceAll("(?i)^.+FROM\\s+.+WHERE\\s+","");
+                String condition = query1.replaceAll("(?i)^.+FROM\\s+.+WHERE\\s+", "");
                 result.add(condition);
             } else {
                 // doesn't contain where
-                String tableName = query1.replaceAll("(?i)^.+FROM\\s+","");
+                String tableName = query1.replaceAll("(?i)^.+FROM\\s+", "");
                 result.add(tableName);
                 result.add("");
             }
@@ -318,19 +283,20 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseDelete (String query){
-        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*;\\s*$")){
+    public static LinkedList<Object> parseDelete(String query) {
+        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
-            query1 = query1.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+","").replaceAll("\\s*;\\s*$","");
-            String tableName = query1.replaceAll("(?i)\\s+WHERE.+$","");
-            String condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+","");
+            query1 = query1.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+", "").replaceAll("\\s*$", "");
+            String tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
+            String condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
             result.add(tableName);
             result.add(condition);
             return result;
         }
         return null;
     }
+
     /*
      * takes the query as its parameter
      * returns a linkedlist of objects
@@ -343,15 +309,15 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseUpdate (String query){
-        if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*;\\s*$")){
+    public static LinkedList<Object> parseUpdate(String query) {
+        if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
-            String tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+","").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*;\\s*$","");
-            String condition = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+","").replaceAll("\\s*;\\s*$","");
-            String[] setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+","").replaceAll("\\s+WHERE\\s+.+\\s*;\\s*$","").split(",");
+            String tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$", "");
+            String condition = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+", "").replaceAll("\\s*$", "");
+            String[] setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s+WHERE\\s+.+\\s*$", "").split(",");
             String[] columns = new String[setters.length];
             String[] newValues = new String[setters.length];
-            for (int i = 0 ; i < setters.length ; i++){
+            for (int i = 0; i < setters.length; i++) {
                 String[] arr = setters[i].split("=");
                 columns[i] = arr[0];
                 newValues[i] = arr[1];
@@ -404,6 +370,10 @@ public class Parser {
             }
         }
         return null;
+    }
+
+    public static void addDataBase(DB dataBase) {
+        dataBases.add(dataBase);
     }
 
 }
