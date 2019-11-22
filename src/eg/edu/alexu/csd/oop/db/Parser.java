@@ -284,12 +284,19 @@ public class Parser {
      * returns null if the query doesn't match
      */
     public static LinkedList<Object> parseDelete(String query) {
-        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*$")) {
+        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+(\\w+|\\w+\\s+WHERE\\s+.+)\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
             query1 = query1.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+", "").replaceAll("\\s*$", "");
-            String tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
-            String condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
+            String tableName;
+            String condition;
+            if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*$")){
+                tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
+                condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
+            } else {
+                tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
+                condition = "";
+            }
             result.add(tableName);
             result.add(condition);
             return result;
@@ -310,13 +317,27 @@ public class Parser {
      * returns null if the query doesn't match
      */
     public static LinkedList<Object> parseUpdate(String query) {
-        if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$")) {
+        if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s*$")){
             LinkedList<Object> result = new LinkedList<>();
-            String tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$", "");
-            String condition = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+", "").replaceAll("\\s*$", "");
-            String[] setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s+WHERE\\s+.+\\s*$", "").split(",");
-            String[] columns = new String[setters.length];
-            String[] newValues = new String[setters.length];
+            String tableName;
+            String condition;
+            String[] setters;
+            String[] columns;
+            String[] newValues;
+            if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$")) {
+                // the query has where
+                tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$", "");
+                condition = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+", "").replaceAll("\\s*$", "");
+                setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s+WHERE\\s+.+\\s*$", "").split(",");
+
+            } else {
+                // doesn't contain where
+                tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s*$", "");
+                condition = "";
+                setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s*$", "").split(",");
+            }
+            columns = new String[setters.length];
+            newValues = new String[setters.length];
             for (int i = 0; i < setters.length; i++) {
                 String[] arr = setters[i].split("=");
                 columns[i] = arr[0];
