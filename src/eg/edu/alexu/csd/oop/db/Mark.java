@@ -24,9 +24,9 @@ public class Mark {
 
     private Object operation[];
 
-    char primaryOperation[]={'+','-','*','/'};
+    private char primaryOperation[]={'+','-','*','/'};
 
-    char AllowedChar[]={'+','-','*','/','(',')','<','>','='};
+    private char AllowedChar[]={'+','-','*','/','(',')','<','>','='};
 
     private  Stack OperationStack=new Stack();
     private Stack DataStack=new Stack();
@@ -268,7 +268,7 @@ public class Mark {
         RemoveNot(x||y);
     }
 
-    boolean isString(Object o , Object o1){
+    private boolean isString(Object o , Object o1){
         if(o.getClass()==String.class){
             if(o1.getClass()==String.class){
                 return true;
@@ -338,7 +338,7 @@ public class Mark {
 
 
     }
-    boolean PrimaryOperation(Object object)
+    private boolean PrimaryOperation(Object object)
     {
         for(char c : primaryOperation) {
             try {
@@ -347,7 +347,7 @@ public class Mark {
         }
         return false;
     }
-    void DeathStack(){
+    private void DeathStack(){
         // at the end of expression to make tow stacks empty
         while (!OperationStack.empty()){
             Object o=OperationStack.peek();
@@ -413,7 +413,7 @@ public class Mark {
         return true;
     }
 
-    boolean before(int x){
+    private boolean before(int x){
         for(int i=x-1;i>=0;i--){
             if(Expression.charAt(i)==' ')continue;
             if(Expression.charAt(i)=='\"')return false;
