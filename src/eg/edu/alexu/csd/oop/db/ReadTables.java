@@ -9,13 +9,13 @@ import java.util.LinkedList;
  *  Table []t =ReadTables.ReadTables("");
  *  it return array of tables
  */
-public class ReadTables {
+class ReadTables {
 
-    public static Table[] ReadTables(String DB) throws Exception {
+    static LinkedList<Table> ReadTables(String DB) throws Exception {
         String tablesName[]=new File(new File("DataBase"+System.getProperty("file.separator")+DB).getAbsolutePath()).list();
-        Table[] tables=new Table[tablesName.length];
-        for(int i=0;i<tables.length;i++){
-            tables[i]=MakeTable(tablesName[i],DB);
+        LinkedList<Table> tables=new LinkedList<>();
+        for(int i=0;i<tablesName.length;i++){
+            tables.add(MakeTable(tablesName[i],DB));
         }
         return tables;
     }

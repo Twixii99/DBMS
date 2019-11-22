@@ -31,7 +31,8 @@ public class Parser {
                 currentDataBase.executeStructureQuery(query);
                 return "";
             } else {
-                DB dummyDataBase = new DB("dummy_database");
+                DB dummyDataBase = new DB();
+                dummyDataBase.setName("dummy_database");
                 dummyDataBase.executeUpdateQuery(query);
                 return "";
             }
@@ -103,7 +104,8 @@ public class Parser {
                         currentDataBase = getDataBase(dataBaseName);
                     } else {
                         // create brand new database
-                        DB newDataBase = new DB(dataBaseName);
+                        DB newDataBase = new DB();
+                        newDataBase.setName(dataBaseName);
                         dataBases.add(newDataBase);
                         currentDataBase = newDataBase;
                     }
@@ -119,10 +121,12 @@ public class Parser {
                         if (selectedDataBase != null) {
                             dataBases.remove(selectedDataBase);
                         }
-                        currentDataBase = new DB(dataBaseName);
+                        currentDataBase = new DB();
+                        currentDataBase.setName(dataBaseName);
                     } else {
                         // doesn't exist
-                        currentDataBase = new DB(dataBaseName);
+                        currentDataBase = new DB();
+                        currentDataBase.setName(dataBaseName);
                         dataBases.add(currentDataBase);
                     }
                     result.add(true);

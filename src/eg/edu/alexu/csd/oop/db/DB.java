@@ -9,19 +9,23 @@ public class DB implements Database {
     private LinkedList<Table> tables = new LinkedList<>();
     private String directoryOfDataBases = "DataBase";
 
-    public DB(String name) {
-        this.name = name;
-    }
-
 
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
         File directory = new File(directoryOfDataBases);
+        if(! directory.exists()) createDirectory(directory.getPath());
+
         //directory for all existed databases
         for(String x  : Objects.requireNonNull(directory.list())){ //loop on all existed db
-            boolean equals = x.toLowerCase().equals(databaseName.toLowerCase());
+            boolean equals = x.equals(databaseName);
             if( equals && !dropIfExists ){ //if exist and not drop >> use it
                 this.name = x;
+                try {
+                    tables = ReadTables.ReadTables(databaseName);
+                }
+                catch (Exception e) {
+                    return e.getMessage();
+                }
                 return "existAndUse";
             }
             if( equals ){ //if exist and drop >> drop the old then create new one and use it
@@ -32,9 +36,11 @@ public class DB implements Database {
             }
         }
 
-        createDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName); //if not exists create it
-        this.name = databaseName;
-        return "notExistAndCreated";
+        if(createDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName)){ //if not exists create it
+            this.name = databaseName;
+            return "notExistAndCreated";
+        }
+        else return "not created";
     }
 
     private void dropDirectory(String path){ //this function can delete a directory and all its contents
@@ -47,16 +53,16 @@ public class DB implements Database {
         }
         oldData.delete();
     }
-    private void createDirectory(String path){ //this function creates a directory witt this path
+    private boolean createDirectory(String path){ //this function creates a directory witt this path
         File directory = new File(path);
-        directory.mkdir();
+        return directory.mkdirs();
     }
 
     @Override
     public boolean executeStructureQuery(String query) throws SQLException {
-        if(query.matches("^create")) { //starts with create
+        if(query.matches("^create .+")) { //starts with create
             LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
-            if (resultOfQuery == null) throw new SQLException("Wrong Drop command");
+            if (resultOfQuery == null) throw new SQLException("Wrong create command");
             if ((Boolean) resultOfQuery.get(0)) { //create DataBase
                 String dataName = (String) resultOfQuery.get(1);
                 Boolean drop = (Boolean) resultOfQuery.get(2);
@@ -154,10 +160,8 @@ public class DB implements Database {
     }
 
     private Table getTable(String tableName){
-        Iterator<Table> tableIterator = tables.listIterator();
-        while (tableIterator.hasNext()){
-            Table table = tableIterator.next();
-            if(table.getName().equals(tableName)){
+        for (Table table : tables) {
+            if (table.getName().equals(tableName)) {
                 return table;
             }
         }
@@ -171,4 +175,7 @@ public class DB implements Database {
         this.tables.remove(table);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 }

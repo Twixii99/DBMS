@@ -15,83 +15,83 @@ public class XSD {
     private static LinkedList<Class> TYPES=new LinkedList();
     public static void MakeXsd(String databaseName, Table tables)  {
 
-    XML.MakeDirectory(databaseName,tables.getName());
-      File dbfile=new File("Database"+ System.getProperty("file.separator") + databaseName +  System.getProperty("file.separator") + tables.getName() +  System.getProperty("file.separator")+ tables.getName() + ".xsd");
-      try {
-          dbfile.createNewFile();
-      } catch (IOException e) {
-          e.printStackTrace();
-      }
-      FileWriter writer;
-      try {
-          writer = new FileWriter(dbfile);
-          StringBuilder str=new StringBuilder("");
+        XML.MakeDirectory(databaseName,tables.getName());
+        File dbfile=new File("Database"+ System.getProperty("file.separator") + databaseName +  System.getProperty("file.separator") + tables.getName() +  System.getProperty("file.separator")+ tables.getName() + ".xsd");
+        try {
+            dbfile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileWriter writer;
+        try {
+            writer = new FileWriter(dbfile);
+            StringBuilder str=new StringBuilder("");
 
 
-          String s=getBeginOfXsd(databaseName,tables.getName());
-          str.append(s);
-          writer.write(s);
+            String s=getBeginOfXsd(databaseName,tables.getName());
+            str.append(s);
+            writer.write(s);
 
 
-          s=getDataXsd(tables.getHeaders(),tables.getTypes());
-          writer.write(s);
+            s=getDataXsd(tables.getHeaders(),tables.getTypes());
+            writer.write(s);
 
 
-          s=getEndXsd();
-          writer.write(s);
+            s=getEndXsd();
+            writer.write(s);
 
-          writer.flush();
-          writer.close();
+            writer.flush();
+            writer.close();
 
 
-      } catch (IOException e) {
-          e.printStackTrace();
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-  }
-   public  static void getXSD(String DB_NAME ,  String Table) throws IOException {
+    }
+    public  static void getXSD(String DB_NAME ,  String Table) throws IOException {
 
-  Labels=new LinkedList<>();
-  TYPES=new LinkedList<>();
-       String str = new String(Files.readAllBytes(Paths.get(new File("Database"+ System.getProperty("file.separator") + DB_NAME +  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
+        Labels=new LinkedList<>();
+        TYPES=new LinkedList<>();
+        String str = new String(Files.readAllBytes(Paths.get(new File("Database"+ System.getProperty("file.separator") + DB_NAME +  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
 
-       Pattern pattern=Pattern.compile("(.*)(<xs:complexType name = '"+Table+"'>)(.*)");
+        Pattern pattern=Pattern.compile("(.*)(<xs:complexType name = '"+Table+"'>)(.*)");
 
-       Matcher matcher=pattern.matcher(str);
+        Matcher matcher=pattern.matcher(str);
 
-       if (matcher.find())
-       {
-           int x=matcher.start();
+        if (matcher.find())
+        {
+            int x=matcher.start();
 
-           String s=new StringBuilder(str).delete(0,x).toString();
+            String s=new StringBuilder(str).delete(0,x).toString();
 
-           pattern=Pattern.compile("(<xs:element)(.*)(/>)");
+            pattern=Pattern.compile("(<xs:element)(.*)(/>)");
 
-           matcher=pattern.matcher(s);
+            matcher=pattern.matcher(s);
 
-           while (matcher.find())
-           {
-               String LastString =matcher.group(2);
+            while (matcher.find())
+            {
+                String LastString =matcher.group(2);
 
-               Labels.add(GetName(LastString));
-               TYPES.add(GetType(LastString));
+                Labels.add(GetName(LastString));
+                TYPES.add(GetType(LastString));
 
-           }
-       }else throw new EOFException("ERROR FORMAT XSD FILE");
+            }
+        }else throw new EOFException("ERROR FORMAT XSD FILE");
     }
 
 
 
     public  static String[] GetNames(){
-      String s[]=new String[Labels.size()];
-      int i=0;
-      for(String str:Labels){
-          s[i++]=str;
-      }
-      return s;
-   }
+        String s[]=new String[Labels.size()];
+        int i=0;
+        for(String str:Labels){
+            s[i++]=str;
+        }
+        return s;
+    }
 
     public static Class[] GetTypes(){
         Class s[]=new Class[TYPES.size()];
@@ -113,7 +113,7 @@ public class XSD {
             return GetClass(new StringBuilder(matcher.group(2)).delete(0,3).toString());
         }
         throw new EOFException("ERROR FORMAT XSD FILE");
-  }
+    }
 
     private static Class GetClass(String group) throws EOFException {
         switch (group)
@@ -140,42 +140,42 @@ public class XSD {
 
     private static String getEndXsd()
     {
-      return  "      </xs:sequence>\n </xs:complexType> \n</xs:schema>" ;
+        return  "      </xs:sequence>\n </xs:complexType> \n</xs:schema>" ;
     }
 
     private static String getDataXsd(String[] labels, Class[] types) throws Exception
     {
-      StringBuilder stringBuilder =new StringBuilder("");
-      for(int i=0;i<labels.length;i++)
-      {
-          String s=getRecord(labels[i],types[i]);
-          stringBuilder.append(s);
-      }
-       return stringBuilder.toString();
+        StringBuilder stringBuilder =new StringBuilder("");
+        for(int i=0;i<labels.length;i++)
+        {
+            String s=getRecord(labels[i],types[i]);
+            stringBuilder.append(s);
+        }
+        return stringBuilder.toString();
     }
 
     private  static String getRecord(String label, Class type) throws Exception
     {
-      return new StringBuilder().append("        <xs:element name =\"").append(label).append( "\" type =\"").append(getclass(type)).append("\"/>\n").toString();
+        return new StringBuilder().append("        <xs:element name =\"").append(label).append( "\" type =\"").append(getclass(type)).append("\"/>\n").toString();
     }
 
     private static  String getclass(Class type) throws Exception
     {
-      if(type==String.class)return "xs:string";
-      if(type==Integer.class||type==int.class)return "xs:int";
-      if(type==Boolean.class||type==boolean.class)return "xs:boolean";
-      throw new Exception("not supported type");
+        if(type==String.class)return "xs:string";
+        if(type==Integer.class||type==int.class)return "xs:int";
+        if(type==Boolean.class||type==boolean.class)return "xs:boolean";
+        throw new Exception("not supported type");
     }
     private  static  String getBeginOfXsd(String DB_name , String table)
     {
-    StringBuilder Str =new StringBuilder("<?xml version = \"1.0\"?>\n   ");
-    Str.append("<xs:schema xmlns:xs = \"http://www.w3.org/2001/XMLSchema\">\n");
-    Str.append( "   <xs:element name = '"+ DB_name+ "'>\n");
-    Str.append("         <xs:complexType>\n              <xs:sequence>\n");
-    Str.append("                  <xs:element name = '"+table+"' type = '"+table+"' minOccurs = '0'  maxOccurs = 'unbounded' />\n ");
-    Str.append("             </xs:sequence>\n" + "         </xs:complexType>\n" + "   </xs:element>\n\n");
-    Str.append("<xs:complexType name = '"+table+"'>\n"+"      <xs:sequence>\n");
-    return Str.toString();
+        StringBuilder Str =new StringBuilder("<?xml version = \"1.0\"?>\n   ");
+        Str.append("<xs:schema xmlns:xs = \"http://www.w3.org/2001/XMLSchema\">\n");
+        Str.append( "   <xs:element name = '"+ DB_name+ "'>\n");
+        Str.append("         <xs:complexType>\n              <xs:sequence>\n");
+        Str.append("                  <xs:element name = '"+table+"' type = '"+table+"'   maxOccurs = 'unbounded' />\n ");
+        Str.append("             </xs:sequence>\n" + "         </xs:complexType>\n" + "   </xs:element>\n\n");
+        Str.append("<xs:complexType name = '"+table+"'>\n"+"      <xs:sequence>\n");
+        return Str.toString();
 
-  }
+    }
 }
