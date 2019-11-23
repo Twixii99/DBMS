@@ -14,7 +14,7 @@ public class DB implements Database {
     public String createDatabase(String databaseName, boolean dropIfExists) {
         File directory = new File(directoryOfDataBases);
         if(! directory.exists()) createDirectory(directory.getPath());
-
+        System.out.println("hi");
         //directory for all existed databases
         for(String x  : Objects.requireNonNull(directory.list())){ //loop on all existed db
             boolean equals = x.equals(databaseName);
