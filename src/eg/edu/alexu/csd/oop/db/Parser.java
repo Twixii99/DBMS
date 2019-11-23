@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Parser {
     private static LinkedList<DB> dataBases = new LinkedList<>();
-    private static DB currentDataBase;
+    private static DB dummyDataBase = new DB("dummy_database");
     private Scanner scanner = new Scanner(System.in);
 
     public Parser() throws SQLException {
@@ -24,50 +24,16 @@ public class Parser {
 
     // takes the query as a parameter, and returns the message back to run(); to show it to the console
     private String parse(String query) throws SQLException {
-        // for databases creation, for example "create database batabase1;"
+        // for databases creation, for example "create database database1;"
         if (query.matches("(?i)^\\s*(CREATE|Drop).+$")) {
             // we are dealing with create
-            if (currentDataBase != null) {
-                currentDataBase.executeStructureQuery(query);
-                return "";
-            } else {
-                DB dummyDataBase = new DB();
-                dummyDataBase.setName("dummy_database");
-                dummyDataBase.executeUpdateQuery(query);
-                return "";
-            }
-        } else if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$")) {
-            // we are dealing with insert statement
-            if (currentDataBase != null) {
-                currentDataBase.executeUpdateQuery(query);
-                return "";
-            } else {
-                return "no database in use";
-            }
-        } else if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$")) {
-            // we are dealing with select statement
-            if (currentDataBase != null) {
-                currentDataBase.executeQuery(query);
-                return "";
-            } else {
-                return "no database in use";
-            }
-        } else if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s.+$")) {
-            // we are dealing with delete statement
-            if (currentDataBase != null) {
-                currentDataBase.executeUpdateQuery(query);
-                return "";
-            } else {
-                return "no database in use";
-            }
-        } else if (query.matches("(?i)^\\s*UPDATE\\s+.+$")) {
-            // we are dealing with delete statement
-            if (currentDataBase != null) {
-                currentDataBase.executeUpdateQuery(query);
-                return "";
-            } else {
-                return "no database in use";
-            }
+            dummyDataBase.executeStructureQuery(query);
+        } else if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$") ||
+                query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$") ||
+                query.matches("(?i)^\\s*DELETE\\s+FROM\\s.+$") ||
+                query.matches("(?i)^\\s*UPDATE\\s+.+$")) {
+            // we are dealing with execute structure query statement
+            dummyDataBase.executeUpdateQuery(query);
         }
         return "wrong input!!";
     }
@@ -95,43 +61,18 @@ public class Parser {
                 // we are dealing with data base
                 result.add(true);
                 query1 = query1.replaceAll("(?i)^\\s*DATABASE\\s+", "");
+                String dataBaseName = "";
                 if (query1.matches("^\\s*\\w+\\s*;\\s*$")) {
-                    // for databases creation, for example "create database databasename1;"
-                    String dataBaseName = query1.replaceAll("\\s*$", "");
-                    result.add(dataBaseName);
-                    result.add(false);
-                    if (containsDataBase(dataBaseName)) {
-                        currentDataBase = getDataBase(dataBaseName);
-                    } else {
-                        // create brand new database
-                        DB newDataBase = new DB();
-                        newDataBase.setName(dataBaseName);
-                        dataBases.add(newDataBase);
-                        currentDataBase = newDataBase;
-                    }
-                    return result;
+                    // for databases creation, for example "create database database_name1;"
+                    dataBaseName = query1.replaceAll("\\s*$", "");
+
                 } else if (query1.matches("(?i)^\\s*\\w+\\s+DROP\\s+IF\\s+EXIST\\s*$")) {
-                    // for example "create database IF NOT EXIST batabase1;"
-                    String dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
-                    result.add(dataBaseName);
-                    query1 = "create database " + dataBaseName + " drop if exist;";
-                    if (containsDataBase(dataBaseName)) {
-                        // already exists, then drop it and create a new one
-                        DB selectedDataBase = getDataBase(dataBaseName);
-                        if (selectedDataBase != null) {
-                            dataBases.remove(selectedDataBase);
-                        }
-                        currentDataBase = new DB();
-                        currentDataBase.setName(dataBaseName);
-                    } else {
-                        // doesn't exist
-                        currentDataBase = new DB();
-                        currentDataBase.setName(dataBaseName);
-                        dataBases.add(currentDataBase);
-                    }
-                    result.add(true);
-                    return result;
+                    // for example "create database drop IF NOT EXIST batabase1;"
+                    dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
                 }
+                result.add(dataBaseName);
+                result.add(true);
+                return result;
             } else if (query1.matches("(?i)^\\s*TABLE\\s+.+")) { // done
                 // we are dealing with table
                 // example: "create table table_name values ( names varchar, phone int, email varchar);"
@@ -174,7 +115,7 @@ public class Parser {
      * like : "Boolean value = (Object[]) Parser.parseDrop(query).get(0);" (Boolean not boolean)
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseDrop(String query) throws SQLException {
+    private LinkedList<Object> parseDrop(String query) throws SQLException {
         if (query.matches("(?i)^\\s*DROP\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
@@ -288,19 +229,12 @@ public class Parser {
      * returns null if the query doesn't match
      */
     public static LinkedList<Object> parseDelete(String query) {
-        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+(\\w+|\\w+\\s+WHERE\\s+.+)\\s*$")) {
+        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
             query1 = query1.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+", "").replaceAll("\\s*$", "");
-            String tableName;
-            String condition;
-            if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*$")){
-                tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
-                condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
-            } else {
-                tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
-                condition = "";
-            }
+            String tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
+            String condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
             result.add(tableName);
             result.add(condition);
             return result;
@@ -321,27 +255,13 @@ public class Parser {
      * returns null if the query doesn't match
      */
     public static LinkedList<Object> parseUpdate(String query) {
-        if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s*$")){
+        if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
-            String tableName;
-            String condition;
-            String[] setters;
-            String[] columns;
-            String[] newValues;
-            if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$")) {
-                // the query has where
-                tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$", "");
-                condition = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+", "").replaceAll("\\s*$", "");
-                setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s+WHERE\\s+.+\\s*$", "").split(",");
-
-            } else {
-                // doesn't contain where
-                tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s*$", "");
-                condition = "";
-                setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s*$", "").split(",");
-            }
-            columns = new String[setters.length];
-            newValues = new String[setters.length];
+            String tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$", "");
+            String condition = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+", "").replaceAll("\\s*$", "");
+            String[] setters = query.replaceAll("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+", "").replaceAll("\\s+WHERE\\s+.+\\s*$", "").split(",");
+            String[] columns = new String[setters.length];
+            String[] newValues = new String[setters.length];
             for (int i = 0; i < setters.length; i++) {
                 String[] arr = setters[i].split("=");
                 columns[i] = arr[0];
@@ -361,7 +281,7 @@ public class Parser {
     private static boolean validateTableStyle(String[] tableStyle) {
         boolean valid = true;
         for (String s : tableStyle) {
-            if (!s.matches("(?i)^\\s*\\w+\\s+(varchar|int)\\s*")) {
+            if (!s.matches("(?i)^\\s*\\w+\\s+(varchar|int|bool)\\s*")) {
                 valid = false;
                 break;
             }
