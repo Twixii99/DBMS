@@ -5,40 +5,41 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DB implements Database {
-    private String name;
+    private String path;
     private LinkedList<Table> tables = new LinkedList<>();
-    private String directoryOfDataBases = "DataBase";
+
+    public DB(){
+    }
+
+    public DB(String dummy_database) {
+        this.path = dummy_database;
+        createDatabase(dummy_database,false);
+    }
 
 
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
-        File directory = new File(directoryOfDataBases);
-        if(! directory.exists()) createDirectory(directory.getPath());
-        System.out.println("hi");
-        //directory for all existed databases
-        for(String x  : Objects.requireNonNull(directory.list())){ //loop on all existed db
-            boolean equals = x.equals(databaseName);
-            if( equals && !dropIfExists ){ //if exist and not drop >> use it
-                this.name = x;
-                try {
-                    tables = ReadTables.ReadTables(databaseName);
-                }
-                catch (Exception e) {
-                    return e.getMessage();
-                }
-                return "existAndUse";
+        File file = new File(databaseName);
+        boolean exist = file.exists() ;
+        if( exist && !dropIfExists ){ //if exist and not drop >> use it
+            this.path = databaseName;
+            try {
+                tables = ReadTables.ReadTables(databaseName);
             }
-            if( equals ){ //if exist and drop >> drop the old then create new one and use it
-                dropDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName);
-                createDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName);
-                this.name = databaseName;
-                return "droppedAndCreateNew";
+            catch (Exception e) {
+                return e.getMessage();
             }
+            return databaseName;
         }
-
-        if(createDirectory(directoryOfDataBases+System.getProperty("file.separator")+databaseName)){ //if not exists create it
-            this.name = databaseName;
-            return "notExistAndCreated";
+        else if( exist && dropIfExists ){ //if exist and drop >> drop the old then create new one and use it
+            dropDirectory(databaseName);
+            createDirectory(databaseName);
+            this.path = databaseName;
+            return databaseName;
+        }
+        if(createDirectory(databaseName)){ //if not exists create it
+            this.path = databaseName;
+            return databaseName;
         }
         else return "not created";
     }
@@ -73,7 +74,7 @@ public class DB implements Database {
                 String[] types = (String[]) resultOfQuery.get(4);
                 Table t = new Table(tableName, namesOfColumns, types);
                 addTable(t);
-                XML.convertIntoXml(name, t);
+                XML.convertIntoXml(path, t);
             }
         }
         else { //starts with drop
@@ -82,14 +83,13 @@ public class DB implements Database {
 
             if ((Boolean) resultOfQuery.get(0)) { //drop DataBase
                 String dataName = (String) resultOfQuery.get(1);
-                dropDirectory(directoryOfDataBases+System.getProperty("file.separator")+dataName);
+                dropDirectory(dataName);
             } else { //drop a table
                 String tableName = (String) resultOfQuery.get(1);
                 Table t = getTable(tableName);
                 if (t == null ) throw new SQLException("table name not exist!");
                 removeTable(t);
-                dropDirectory(directoryOfDataBases+System.getProperty("file.separator")+
-                        name+System.getProperty("file.separator")+tableName);
+                dropDirectory(path+System.getProperty("file.separator")+tableName);
             }
         }
         return true;
@@ -146,7 +146,7 @@ public class DB implements Database {
     }
 
     public String getName() {
-        return this.name;
+        return this.path;
     }
 
     public boolean containsTable(String tableName){
@@ -175,7 +175,7 @@ public class DB implements Database {
         this.tables.remove(table);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPath(String path) {
+        this.path = path;
     }
 }

@@ -22,11 +22,22 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.LinkedList;
 
 public class XML {
-    public static boolean convertIntoXml(String DataBaseName , Table table) {
+    public static boolean convertIntoXml(String Path , Table table) throws SQLException {
 
+        File file =new File(Path);
+        if(!file.exists()){
+            throw new SQLException(Path+"  ISN'T FOUND");
+        }
+        file=new File(Path+System.getProperty("file.separator")+table.getName());
+
+        if(!file.exists()){
+            file.mkdir();
+            XSD.MakeXsd(Path+System.getProperty("file.separator")+table.getName()+System.getProperty("file.separator")+table.getName(),table);
+        }
         LinkedList<Object[]> data =table.getTable();
         String TableName =table.getName();
         String []Labels=table.getHeaders();
@@ -40,11 +51,11 @@ public class XML {
             return false;
         }
         Document doc = dBuilder.newDocument();
-        Element rootElement = doc.createElement(DataBaseName);
+        Element rootElement = doc.createElement(table.getName());
         doc.appendChild(rootElement);
 
         for (Object[] objects : data) {
-            Element row = doc.createElement(TableName);
+            Element row = doc.createElement("record");
             rootElement.appendChild(row);
             int numberOfColumn = 0;
             for (Object object : objects) {
@@ -65,9 +76,7 @@ public class XML {
         }
         DOMSource source = new DOMSource(doc);
 
-        MakeDirectory(DataBaseName,TableName);
-        StreamResult result = new StreamResult(new File("Database"+System.getProperty("file.separator") + DataBaseName +
-                System.getProperty("file.separator") + TableName + System.getProperty("file.separator") + TableName + ".xml"));
+        StreamResult result = new StreamResult(Path+System.getProperty("file.separator")+ TableName + System.getProperty("file.separator") + TableName + ".xml");
         try {
             transformer.transform(source, result);
         } catch (TransformerException e) {
@@ -77,10 +86,10 @@ public class XML {
         return true;
     }
 
-    public static LinkedList<Object[]> convertFromXml(String dataBase, String table, Class[] types) throws Exception {
+    public static LinkedList<Object[]> convertFromXml(String Path, String table, Class[] types) throws Exception {
         // validate the data before loading it
 
-        String s="DataBase"+System.getProperty("file.separator")+dataBase+System.getProperty("file.separator")+table+System.getProperty("file.separator")+table;
+        String s=Path+System.getProperty("file.separator")+table+System.getProperty("file.separator")+table;
 
         boolean isValid = validateXMLSchema(s+ ".xsd",s+".xml");
         if(isValid){
@@ -92,13 +101,12 @@ public class XML {
 
         LinkedList<Object[]> data = new LinkedList<>();
         try {
-            File file = new File("Database"+System.getProperty("file.separator") +
-                    dataBase + System.getProperty("file.separator") + table + System.getProperty("file.separator") + table + ".xml");
+            File file = new File(Path+System.getProperty("file.separator") + table + System.getProperty("file.separator") + table + ".xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
-            NodeList nList = doc.getElementsByTagName(table);
+            NodeList nList = doc.getElementsByTagName("record");
             for (int i = 0; i < nList.getLength(); i++) {
                 Node nNode = nList.item(i);
                 Object[] row = new Object[types.length];
@@ -106,12 +114,12 @@ public class XML {
                 NodeList nodeList =eElement.getChildNodes();
                 for (int j = 0; j < eElement.getChildNodes().getLength(); j++) {
                     String str = nodeList.item(j).getTextContent();
-                   if (types[j] == String.class) {
+                    if (types[j] == String.class) {
                         row[j]=str;
                     } else if (types[j] == int.class||types[j] == Integer.class) {
-                       row[j]=(Integer.parseInt(str));
+                        row[j]=(Integer.parseInt(str));
                     } else if (types[j] == boolean.class||types[j] == Boolean.class) {
-                       row[j]=(Boolean.parseBoolean(str));
+                        row[j]=(Boolean.parseBoolean(str));
                     } else {
                         throw new Exception("not supported type");
                     }
@@ -127,22 +135,7 @@ public class XML {
     }
 
 
-    public static void MakeDirectory( String DataBaseName , String  TableName){
-        File file;
-        if(System.getProperty("DataBase")==null) {
-            file = new File("DataBase");
-            file.mkdirs();
-        }
-        if(System.getProperty("Database"+System.getProperty("file.separator") + DataBaseName)==null) {
-            file = new File("Database"+System.getProperty("file.separator") + DataBaseName);
-            file.mkdirs();
 
-        }
-        if(System.getProperty("Database"+System.getProperty("file.separator") + DataBaseName + System.getProperty("file.separator") + TableName)==null) {
-            file = new File("Database"+System.getProperty("file.separator") + DataBaseName + System.getProperty("file.separator") + TableName);
-            file.mkdirs();
-        }
-    }
 
     public static boolean validateXMLSchema(String xsdPath, String xmlPath){
         try {

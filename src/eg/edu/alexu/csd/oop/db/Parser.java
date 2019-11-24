@@ -115,7 +115,7 @@ public class Parser {
      * like : "Boolean value = (Object[]) Parser.parseDrop(query).get(0);" (Boolean not boolean)
      * returns null if the query doesn't match
      */
-    private LinkedList<Object> parseDrop(String query) throws SQLException {
+    public static LinkedList<Object> parseDrop(String query) throws SQLException {
         if (query.matches("(?i)^\\s*DROP\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;

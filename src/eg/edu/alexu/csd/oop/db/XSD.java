@@ -13,10 +13,9 @@ import java.util.regex.Pattern;
 public class XSD {
     private static LinkedList<String> Labels=new LinkedList();
     private static LinkedList<Class> TYPES=new LinkedList();
-    public static void MakeXsd(String databaseName, Table tables)  {
+    public static void MakeXsd(String Path, Table tables)  {
 
-        XML.MakeDirectory(databaseName,tables.getName());
-        File dbfile=new File("Database"+ System.getProperty("file.separator") + databaseName +  System.getProperty("file.separator") + tables.getName() +  System.getProperty("file.separator")+ tables.getName() + ".xsd");
+        File dbfile=new File(Path+".xsd");
         try {
             dbfile.createNewFile();
         } catch (IOException e) {
@@ -28,10 +27,11 @@ public class XSD {
             StringBuilder str=new StringBuilder("");
 
 
-            String s=getBeginOfXsd(databaseName,tables.getName());
+            String s=getBeginOfXsd(tables.getName());
             str.append(s);
             writer.write(s);
 
+            System.out.println(tables.getTypes()[0]);
 
             s=getDataXsd(tables.getHeaders(),tables.getTypes());
             writer.write(s);
@@ -51,13 +51,13 @@ public class XSD {
         }
 
     }
-    public  static void getXSD(String DB_NAME ,  String Table) throws IOException {
+    public static void getXSD(String Path ,  String Table) throws IOException {
 
         Labels=new LinkedList<>();
         TYPES=new LinkedList<>();
-        String str = new String(Files.readAllBytes(Paths.get(new File("Database"+ System.getProperty("file.separator") + DB_NAME +  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
+        String str = new String(Files.readAllBytes(Paths.get(new File(Path+  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
 
-        Pattern pattern=Pattern.compile("(.*)(<xs:complexType name = '"+Table+"'>)(.*)");
+        Pattern pattern=Pattern.compile("(.*)(<xs:complexType name = 'record'>)(.*)");
 
         Matcher matcher=pattern.matcher(str);
 
@@ -161,20 +161,21 @@ public class XSD {
 
     private static  String getclass(Class type) throws Exception
     {
+
         if(type==String.class)return "xs:string";
         if(type==Integer.class||type==int.class)return "xs:int";
         if(type==Boolean.class||type==boolean.class)return "xs:boolean";
-        throw new Exception("not supported type");
+        throw new Exception(type+"not supported type");
     }
-    private  static  String getBeginOfXsd(String DB_name , String table)
+    private  static  String getBeginOfXsd( String table)
     {
         StringBuilder Str =new StringBuilder("<?xml version = \"1.0\"?>\n   ");
         Str.append("<xs:schema xmlns:xs = \"http://www.w3.org/2001/XMLSchema\">\n");
-        Str.append( "   <xs:element name = '"+ DB_name+ "'>\n");
+        Str.append( "   <xs:element name = '"+ table+ "'>\n");
         Str.append("         <xs:complexType>\n              <xs:sequence>\n");
-        Str.append("                  <xs:element name = '"+table+"' type = '"+table+"'   maxOccurs = 'unbounded' />\n ");
+        Str.append("                  <xs:element name = 'record' type = 'record'   maxOccurs = 'unbounded' />\n ");
         Str.append("             </xs:sequence>\n" + "         </xs:complexType>\n" + "   </xs:element>\n\n");
-        Str.append("<xs:complexType name = '"+table+"'>\n"+"      <xs:sequence>\n");
+        Str.append("<xs:complexType name = 'record'>\n"+"      <xs:sequence>\n");
         return Str.toString();
 
     }
