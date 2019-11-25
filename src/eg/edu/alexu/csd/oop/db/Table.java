@@ -52,7 +52,7 @@ public class Table {
                     if (!(record[i] instanceof String)) {
                         return false;
                     }
-                } else if ((types[i + 1].equalsIgnoreCase("Boolean"))){
+                } else if ((types[i + 1].equalsIgnoreCase("Boolean"))) {
                     if (!(record[i] instanceof Boolean)) {
                         return false;
                     }
@@ -184,7 +184,7 @@ public class Table {
     }
 
     // order By Which The Record Is Added, returns null if not found ( was removed by now)
-    public Object[] getRecord(int innerID) {
+    private Object[] getRecord(int innerID) {
         Iterator<Object[]> iterator = table.listIterator(0);
         while (iterator.hasNext()) {
             Object[] record = iterator.next();
@@ -196,6 +196,20 @@ public class Table {
         }
         return null;
     }
+
+    public void updateHoleTable(String[] newValue) {
+        if (true) {
+            Object[] tempRecord = new Object[newValue.length + 1];
+            System.arraycopy(newValue, 0, tempRecord, 1, newValue.length);
+            lastRecordId = 0;
+            tempRecord[0] = lastRecordId;
+            int i = 0;
+            for (Object[] objects : table) {
+                table.set(i++, tempRecord);
+            }
+        }
+    }
+
 
     // get the order by which you added this/there record(s), and returns empty linkedlist if it didn't find any suitable record
     public LinkedList<Integer> getInnerID(String header, Object value) {
@@ -246,5 +260,13 @@ public class Table {
             }
         }
         return stringBuilder.toString();
+    }
+
+    public int numberOfHeaders(){
+        return this.headers.length - 1;
+    }
+
+    public void emptyTheTable(){
+        this.table = new LinkedList<>();
     }
 }

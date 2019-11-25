@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
-public class XML {
-    public static boolean convertIntoXml(String Path , Table table) throws SQLException {
+class XML {
+    static boolean convertIntoXml(String Path, Table table) throws SQLException {
 
         File file =new File(Path);
         if(!file.exists()){
@@ -86,15 +86,13 @@ public class XML {
         return true;
     }
 
-    public static LinkedList<Object[]> convertFromXml(String Path, String table, Class[] types) throws Exception {
+    static LinkedList<Object[]> convertFromXml(String Path, String table, Class[] types) throws Exception {
         // validate the data before loading it
 
         String s=Path+System.getProperty("file.separator")+table+System.getProperty("file.separator")+table;
 
         boolean isValid = validateXMLSchema(s+ ".xsd",s+".xml");
-        if(isValid){
-            System.out.println("XML IS VALID ");
-        }else {
+        if(! isValid) {
             throw new Exception("XML ISN'T VALID");
         }
 
@@ -128,16 +126,13 @@ public class XML {
                 data.add(row);
             }
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
         return data;
     }
 
-
-
-
-    public static boolean validateXMLSchema(String xsdPath, String xmlPath){
+    private static boolean validateXMLSchema(String xsdPath, String xmlPath){
         try {
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = factory.newSchema(new File(xsdPath));

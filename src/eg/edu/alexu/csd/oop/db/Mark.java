@@ -1,5 +1,6 @@
 package eg.edu.alexu.csd.oop.db;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -31,9 +32,9 @@ public class Mark {
     private  Stack OperationStack=new Stack();
     private Stack DataStack=new Stack();
 
-    public LinkedList GetData(String Express, Table table) throws Exception {
+    public  LinkedList<Object> getData(String Express, Table table) throws SQLException {
 
-        LinkedList correct=new LinkedList();
+        LinkedList<Object> correct=new LinkedList<>();
         String TempExpreetion=Spaces(Express);
 
         LinkedList<Object[]> Data = table.getTable();
@@ -368,14 +369,13 @@ public class Mark {
         DataStack.push(!b);
     }
 
-
     private void Mark()
     {
         System.out.println(Expression);
         for(int i=0;i<column.length;i++)
         {
             if(Types[i]==String.class){
-                Replace(" "+column[i].toLowerCase(),"\""+((String) Data[i]).toLowerCase()+"\"");
+                Replace(" "+column[i].toLowerCase(),((String) Data[i]).toLowerCase());
             }else {
                 Replace(" "+column[i],String.valueOf(Data[i]));
             }

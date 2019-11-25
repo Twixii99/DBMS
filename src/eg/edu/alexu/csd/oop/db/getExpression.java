@@ -1,5 +1,6 @@
 package eg.edu.alexu.csd.oop.db;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +13,7 @@ public class getExpression {
     private String AllowedStrings[]={"and","or","not"};
     private String str;
 
-    public  Object[] GetExpression(String str) throws Exception {
+    public  Object[] GetExpression(String str) throws SQLException {
         this.str=str;
         DuplicateSpaces();
         GetStrings();
@@ -36,7 +37,7 @@ public class getExpression {
         return objects;
     }
 
-    private Object FindType(String first) throws Exception {
+    private Object FindType(String first) throws SQLException {
         if(isInteger(first)){
             return Integer.parseInt( first );
         }
@@ -44,12 +45,12 @@ public class getExpression {
             if(iSALLOWEDCHAR(first.charAt(0))){
                 return first.charAt(0);
             }
-            throw new Exception(first +" isn't a column in the table ");
+            throw new SQLException(first +" isn't a column in the table ");
         }
         if(AlOWSTRING(first)){
             return first;
         }
-        throw new Exception(first +" isn't a column in the table ");
+        throw new SQLException(first +" isn't a column in the table ");
     }
 
     private boolean AlOWSTRING(String first) {

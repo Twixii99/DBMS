@@ -49,5 +49,5 @@ public interface Database {
 	 * @throws SQLException
 	 *             syntax error
 	 */
-	public int executeUpdateQuery(String query) throws java.sql.SQLException;
+	public int executeUpdateQuery(String query) throws java.sql.SQLException, Exception;
 }

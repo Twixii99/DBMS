@@ -1,41 +1,63 @@
 package eg.edu.alexu.csd.oop.db;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Parser {
-    private static LinkedList<DB> dataBases = new LinkedList<>();
-    private static DB dummyDataBase = new DB("dummy_database");
+    private static DB dummyDataBase = new DB();
     private Scanner scanner = new Scanner(System.in);
 
-    public Parser() throws SQLException {
+    public Parser() throws Exception {
         run();
+/*        create database d1
+        create table t1 values (name varchar, phone int, email varchar)
+        insert into t1 (name, phone, email) values ('abc', 123, 'abc@email.com')
+        insert into t1 (name, phone, email) values ('def', 456, 'def@email.com')
+        insert into t1 (name, phone, email) values ('ijk', 789, 'ijk@email.com')
+        select * from t1*/
     }
 
-    private void run() throws SQLException {
+    private void run() throws Exception {
         String command;
         do {
             command = scanner.nextLine();
-            System.out.println(parse(command));
+            System.out.print(parse(command));
         } while (!command.equalsIgnoreCase(".quit"));
     }
 
     // takes the query as a parameter, and returns the message back to run(); to show it to the console
-    private String parse(String query) throws SQLException {
+    private String parse(String query) throws Exception {
         // for databases creation, for example "create database database1;"
         if (query.matches("(?i)^\\s*(CREATE|Drop).+$")) {
             // we are dealing with create
             dummyDataBase.executeStructureQuery(query);
+            return "";
         } else if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$") ||
-                query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$") ||
                 query.matches("(?i)^\\s*DELETE\\s+FROM\\s.+$") ||
                 query.matches("(?i)^\\s*UPDATE\\s+.+$")) {
             // we are dealing with execute structure query statement
             dummyDataBase.executeUpdateQuery(query);
+            return "";
+        } else if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$")){
+            Object[][] selectedTable = dummyDataBase.executeQuery(query);
+            StringBuilder stringBuilder = new StringBuilder("");
+            for (int i = 0; i < selectedTable.length; i++) {
+                for (int j = 0; j < selectedTable[i].length ; j++) {
+                    stringBuilder.append(selectedTable[i][j]);
+                    if ( j < selectedTable.length ){
+                        stringBuilder.append('|');
+                    }
+                }
+                stringBuilder.append('\n');
+            }
+            return stringBuilder.toString();
+        } else if (query.matches("(?i)^\\.quit\\s*$")){
+            return "thanks for enjoying out DBMS";
+        } else if (query.matches("(?i)^\\.schema\\s*$")) {
+            return dummyDataBase.schema();
         }
-        return "wrong input!!";
+        return "wrong input!! " + "\n";
     }
 
 
@@ -62,16 +84,17 @@ public class Parser {
                 result.add(true);
                 query1 = query1.replaceAll("(?i)^\\s*DATABASE\\s+", "");
                 String dataBaseName = "";
-                if (query1.matches("^\\s*\\w+\\s*;\\s*$")) {
+                boolean dropIfExist = false;
+                if (query1.matches("^\\s*\\w+\\s*$")) {
                     // for databases creation, for example "create database database_name1;"
                     dataBaseName = query1.replaceAll("\\s*$", "");
-
                 } else if (query1.matches("(?i)^\\s*\\w+\\s+DROP\\s+IF\\s+EXIST\\s*$")) {
                     // for example "create database drop IF NOT EXIST batabase1;"
                     dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
+                    dropIfExist = true;
                 }
                 result.add(dataBaseName);
-                result.add(true);
+                result.add(dropIfExist);
                 return result;
             } else if (query1.matches("(?i)^\\s*TABLE\\s+.+")) { // done
                 // we are dealing with table
@@ -81,20 +104,20 @@ public class Parser {
                 tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s+VALUES.+\\s*$", "");
                 result.add(tableName);
                 result.add(false);
-                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "\\s+VALUES\\s*[(]\\s*", "").replaceAll("\\s*[)]\\s*$", "").split(",");
+                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "(?i)\\s+VALUES\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*$", "").split(",");
                 // dataStyle will look like "[name varchar, phone int, email varchar]"
                 String[] headers = new String[dataStyle.length];
-                Class[] types = new Class[dataStyle.length];
+                String[] types = new String[dataStyle.length];
                 if (validateTableStyle(dataStyle)) {
                     for (int i = 0; i < dataStyle.length; i++) {
                         String[] temp = dataStyle[i].replaceAll("^\\s+", "").replaceAll("\\s+$", "").split("\\s+");
                         headers[i] = temp[0];
                         if (temp[1].equalsIgnoreCase("varchar")) {
-                            types[i] = String.class;
+                            types[i] = "String";
                         } else if (temp[1].equalsIgnoreCase("int")) {
-                            types[i] = Integer.class;
+                            types[i] = "Integer";
                         } else if (temp[1].equalsIgnoreCase("bool")) {
-                            types[i] = Boolean.class;
+                            types[i] = "Boolean";
                         }
                     }
                 }
@@ -126,13 +149,6 @@ public class Parser {
                 result.add(true);
                 String dataBaseName = query1.replaceAll("(?i)^\\s*DATABASE\\s+", "").replaceAll("(?i)\\s*$", "");
                 result.add(dataBaseName);
-                if (containsDataBase(dataBaseName)) {
-                    // the database exist then
-                    DB selectedDataBase = getDataBase(dataBaseName);
-                    if (selectedDataBase != null) {
-                        dataBases.remove(selectedDataBase);
-                    }
-                }
             } else if (query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*$")) {
                 // we are dealing with table dropping
                 // example: "DROP TABLE table_name;"
@@ -229,12 +245,18 @@ public class Parser {
      * returns null if the query doesn't match
      */
     public static LinkedList<Object> parseDelete(String query) {
-        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+\\w+\\s+WHERE\\s+.+\\s*$")) {
+        if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+.+$")) {
             LinkedList<Object> result = new LinkedList<>();
-            String query1 = query;
-            query1 = query1.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+", "").replaceAll("\\s*$", "");
-            String tableName = query1.replaceAll("(?i)\\s+WHERE.+$", "");
-            String condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
+            String query1 = query.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+", "").replaceAll("\\s*$","");
+            String tableName = "";
+            String condition = "";
+            if (query1.matches("(?i)^\\w+\\s*WHERE\\s+.+\\s*$")) {
+                tableName = query1.replaceAll("(?i)^\\s+WHERE.+$", "").replaceAll("(?i)\\s*where.+\\s*$","");
+                condition = query1.replaceAll("(?i)^\\s*\\w+\\s+WHERE\\s+", "");
+            } else if (query1.matches("(?i)^\\s*\\w+\\s*$")){
+                tableName = query1;
+                condition = "";
+            }
             result.add(tableName);
             result.add(condition);
             return result;
@@ -297,29 +319,6 @@ public class Parser {
         return tempArray;
     }
 
-    private static boolean containsDataBase(String dataBaseName) {
-        for (DB dataBase : dataBases) {
-            if (dataBase.getName().equalsIgnoreCase(dataBaseName)) {
-                // already exists
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static DB getDataBase(String dataBaseName) {
-        for (DB dataBase : dataBases) {
-            if (dataBase.getName().equalsIgnoreCase(dataBaseName)) {
-                // already exists
-                return dataBase;
-            }
-        }
-        return null;
-    }
-
-    public static void addDataBase(DB dataBase) {
-        dataBases.add(dataBase);
-    }
 
 }
 

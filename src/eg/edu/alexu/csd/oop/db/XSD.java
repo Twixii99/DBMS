@@ -10,10 +10,11 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class XSD {
-    private static LinkedList<String> Labels=new LinkedList();
-    private static LinkedList<Class> TYPES=new LinkedList();
-    public static void MakeXsd(String Path, Table tables)  {
+class XSD {
+
+    private static LinkedList<String> Labels=new LinkedList<>();
+    private static LinkedList<Class> TYPES=new LinkedList<>();
+    static void MakeXsd(String Path, Table tables)  {
 
         File dbfile=new File(Path+".xsd");
         try {
@@ -24,9 +25,7 @@ public class XSD {
         FileWriter writer;
         try {
             writer = new FileWriter(dbfile);
-            StringBuilder str=new StringBuilder("");
-
-
+            StringBuilder str=new StringBuilder();
             String s=getBeginOfXsd(tables.getName());
             str.append(s);
             writer.write(s);
@@ -44,14 +43,12 @@ public class XSD {
             writer.close();
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-    public static void getXSD(String Path ,  String Table) throws IOException {
+    static void getXSD(String Path, String Table) throws IOException {
 
         Labels=new LinkedList<>();
         TYPES=new LinkedList<>();
@@ -84,8 +81,8 @@ public class XSD {
 
 
 
-    public  static String[] GetNames(){
-        String s[]=new String[Labels.size()];
+    static String[] GetNames(){
+        String[] s =new String[Labels.size()];
         int i=0;
         for(String str:Labels){
             s[i++]=str;
@@ -93,8 +90,8 @@ public class XSD {
         return s;
     }
 
-    public static Class[] GetTypes(){
-        Class s[]=new Class[TYPES.size()];
+    static Class[] GetTypes(){
+        Class[] s =new Class[TYPES.size()];
         int i=0;
         for(Class cls:TYPES){
             s[i++]=cls;
@@ -145,7 +142,7 @@ public class XSD {
 
     private static String getDataXsd(String[] labels, Class[] types) throws Exception
     {
-        StringBuilder stringBuilder =new StringBuilder("");
+        StringBuilder stringBuilder =new StringBuilder();
         for(int i=0;i<labels.length;i++)
         {
             String s=getRecord(labels[i],types[i]);
@@ -156,7 +153,7 @@ public class XSD {
 
     private  static String getRecord(String label, Class type) throws Exception
     {
-        return new StringBuilder().append("        <xs:element name =\"").append(label).append( "\" type =\"").append(getclass(type)).append("\"/>\n").toString();
+        return "        <xs:element name =\"" + label + "\" type =\"" + getclass(type) + "\"/>\n";
     }
 
     private static  String getclass(Class type) throws Exception
@@ -169,14 +166,12 @@ public class XSD {
     }
     private  static  String getBeginOfXsd( String table)
     {
-        StringBuilder Str =new StringBuilder("<?xml version = \"1.0\"?>\n   ");
-        Str.append("<xs:schema xmlns:xs = \"http://www.w3.org/2001/XMLSchema\">\n");
-        Str.append( "   <xs:element name = '"+ table+ "'>\n");
-        Str.append("         <xs:complexType>\n              <xs:sequence>\n");
-        Str.append("                  <xs:element name = 'record' type = 'record'   maxOccurs = 'unbounded' />\n ");
-        Str.append("             </xs:sequence>\n" + "         </xs:complexType>\n" + "   </xs:element>\n\n");
-        Str.append("<xs:complexType name = 'record'>\n"+"      <xs:sequence>\n");
-        return Str.toString();
+        return "<?xml version = \"1.0\"?>\n   " + "<xs:schema xmlns:xs = \"http://www.w3.org/2001/XMLSchema\">\n" +
+                "   <xs:element name = '" + table + "'>\n" +
+                "         <xs:complexType>\n              <xs:sequence>\n" +
+                "                  <xs:element name = 'record' type = 'record'   minOccurs='0' maxOccurs = 'unbounded' />\n " +
+                "             </xs:sequence>\n" + "         </xs:complexType>\n" + "   </xs:element>\n\n" +
+                "<xs:complexType name = 'record'>\n" + "      <xs:sequence>\n";
 
     }
 }
