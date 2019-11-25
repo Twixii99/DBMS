@@ -4,11 +4,11 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-public class Parser {
+class Parser {
     private static DB dummyDataBase = new DB();
     private Scanner scanner = new Scanner(System.in);
 
-    public Parser() throws Exception {
+    Parser() throws Exception {
         run();
 /*        create database d1
         create table t1 values (name varchar, phone int, email varchar)
@@ -41,11 +41,11 @@ public class Parser {
             return "";
         } else if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$")){
             Object[][] selectedTable = dummyDataBase.executeQuery(query);
-            StringBuilder stringBuilder = new StringBuilder("");
-            for (int i = 0; i < selectedTable.length; i++) {
-                for (int j = 0; j < selectedTable[i].length ; j++) {
-                    stringBuilder.append(selectedTable[i][j]);
-                    if ( j < selectedTable.length ){
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Object[] objects : selectedTable) {
+                for (int j = 0; j < objects.length; j++) {
+                    stringBuilder.append(objects[j]);
+                    if (j < selectedTable.length) {
                         stringBuilder.append('|');
                     }
                 }
@@ -74,7 +74,7 @@ public class Parser {
      * like : "Boolean value = (Object[]) Parser.parseCreate(query).get(2);" (Boolean not boolean)
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseCreate(String query) throws SQLException {
+    static LinkedList<Object> parseCreate(String query) throws SQLException {
         if (query.matches("(?i)^\\s*CREATE.+$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
@@ -138,7 +138,7 @@ public class Parser {
      * like : "Boolean value = (Object[]) Parser.parseDrop(query).get(0);" (Boolean not boolean)
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseDrop(String query) throws SQLException {
+    static LinkedList<Object> parseDrop(String query) throws SQLException {
         if (query.matches("(?i)^\\s*DROP\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
@@ -171,7 +171,7 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseInsert(String query) {
+    static LinkedList<Object> parseInsert(String query) {
         // example: "insert into table_name (column1 ,column2, column3) values (value1, value2, value3);"
         if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s+\\w+\\s*[(].*[)]\\s*VALUES\\s*[(].+[)]\\s*$")) {
             String query1 = query;
@@ -203,7 +203,7 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseSelect(String query) {
+    static LinkedList<Object> parseSelect(String query) {
         if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             // don't know if it contains where or not
@@ -244,7 +244,7 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseDelete(String query) {
+    static LinkedList<Object> parseDelete(String query) {
         if (query.matches("(?i)^\\s*DELETE\\s+FROM\\s+.+$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query.replaceAll("(?i)^\\s*DELETE\\s+FROM\\s+", "").replaceAll("\\s*$","");
@@ -276,7 +276,7 @@ public class Parser {
      * like : "String value = (Object[]) Parser.parseInsert(query).get(2);"
      * returns null if the query doesn't match
      */
-    public static LinkedList<Object> parseUpdate(String query) {
+    static LinkedList<Object> parseUpdate(String query) {
         if (query.matches("(?i)^\\s*UPDATE\\s+\\w+\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$")) {
             LinkedList<Object> result = new LinkedList<>();
             String tableName = query.replaceAll("(?i)^\\s*UPDATE\\s+", "").replaceAll("(?i)\\s+SET\\s+.+\\s+WHERE\\s+.+\\s*$", "");

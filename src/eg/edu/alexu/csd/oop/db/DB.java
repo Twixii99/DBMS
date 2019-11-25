@@ -139,9 +139,7 @@ public class DB implements Database {
                 return null;
             }
         } else {
-            for (Object record : getTable(tableName).getTable()){
-                references.add(record);
-            }
+            references.addAll(getTable(tableName).getTable());
         }
         Object[][] arr  = new Object[references.size()][columns.size()];
         LinkedList<Integer> columnsIndexes = new LinkedList<>();
@@ -183,7 +181,7 @@ public class DB implements Database {
      * checks data types of the the insertions
      * rearrange the data to make it right to according to the scheme
      */
-    public int excuteInsert(String query) {
+    private int excuteInsert(String query) {
 
         data = Parser.parseInsert(query);
         if(data == null)
@@ -206,7 +204,7 @@ public class DB implements Database {
         return -1;
     }
 
-    public Object[] convertToObjects(String[] str) {
+    private Object[] convertToObjects(String[] str) {
         Object[] obj = new Object[str.length];
         int i = 0;
         for(String temp : str) {
@@ -220,7 +218,7 @@ public class DB implements Database {
         return obj;
     }
 
-    public int excuteDelete(String query) throws Exception {
+    private int excuteDelete(String query) throws Exception {
         data = Parser.parseDelete(query);
         if(data == null)
             return 0;
@@ -246,7 +244,7 @@ public class DB implements Database {
         return -1;
     }
 
-    public int excuteUpdate(String query) throws Exception {
+    private int excuteUpdate(String query) throws Exception {
         LinkedList<Object> markedList = new LinkedList<>();
         data = Parser.parseUpdate(query);
         if(data == null)
@@ -279,11 +277,11 @@ public class DB implements Database {
         return markedList.size();
     }
 
-    public Table existance(String tableName) {
+    private Table existance(String tableName) {
             return this.getTable(tableName);
     }
 
-    public Boolean containsTheseHeaders(String[] headers, String[] values) {
+    private Boolean containsTheseHeaders(String[] headers, String[] values) {
         LinkedList<String> actualHeadersAsList = new LinkedList<String>(Arrays.asList(actualHeaders));
         int i;
         for(i = 0; i < headers.length; ++i) {
@@ -304,12 +302,10 @@ public class DB implements Database {
                 }
             }
         }
-        if(i == headers.length)
-            return true;
-        return false;
+        return i == headers.length;
     }
 
-    public String[] rearrange(String[] headers, String[] values) {
+    private String[] rearrange(String[] headers, String[] values) {
         LinkedList<String> headersList = new LinkedList<String>(Arrays.asList(headers));
         String[] dummy = new String[actualHeaders.length];
         for(int i = 0; i < headersList.size(); ++i) {
@@ -347,7 +343,4 @@ public class DB implements Database {
         this.tables.remove(table);
     }
 
-    public LinkedList<Table> getTables() {
-        return tables;
-    }
 }

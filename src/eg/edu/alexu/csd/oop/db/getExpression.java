@@ -5,15 +5,15 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class getExpression {
+class getExpression {
     private LinkedList< Pair <String , Pair< Integer, Integer> > > Strings=new LinkedList<>();
     private LinkedList< Pair <String , Pair< Integer, Integer> > > Container=new LinkedList<>();
     private LinkedList <Object> Expresstion=new LinkedList<>();
-    private char AllowedChar[]={'+','-','*','/','(',')','<','>','='};
-    private String AllowedStrings[]={"and","or","not"};
+    private char[] AllowedChar ={'+','-','*','/','(',')','<','>','='};
+    private String[] AllowedStrings ={"and","or","not"};
     private String str;
 
-    public  Object[] GetExpression(String str) throws SQLException {
+    Object[] GetExpression(String str) throws SQLException {
         this.str=str;
         DuplicateSpaces();
         GetStrings();
@@ -30,7 +30,7 @@ public class getExpression {
             Expresstion.add(FindType(Container.get(indexOfContainers++).first));
         }
 
-        Object objects[]=new Object[Expresstion.size()];
+        Object[] objects =new Object[Expresstion.size()];
         for(int i=0;i<Expresstion.size();i++){
             objects[i]=Expresstion.get(i);
         }
@@ -75,17 +75,16 @@ public class getExpression {
     }
 
     private void DuplicateSpaces() {
-        String s=" ";
+        StringBuilder s= new StringBuilder(" ");
         for(int i=0;i<str.length();i++){
             if(str.charAt(i)!=' '){
-                s+=str.charAt(i);
+                s.append(str.charAt(i));
                 continue;
             }
-            s+="  ";
+            s.append("  ");
         }
-        s+=" ";
-        str=s;
-        return ;
+        s.append(" ");
+        str= s.toString();
     }
 
     private void GetObjects() {
@@ -94,8 +93,8 @@ public class getExpression {
         while (matcher.find()){
             String s = new StringBuilder(matcher.group(1)).delete(0,1).delete(matcher.group(1).length()-2,matcher.group(1).length()-1).toString();
             if(OVERLAPPING(matcher.start(),matcher.end()))continue;
-            Pair<String , Pair< Integer , Integer>> p=new Pair<>();
-            Pair<Integer , Integer> pSecond =new Pair<>( matcher.start(),matcher.end());
+            Pair<String , Pair< Integer , Integer>> p= new Pair<>();
+            Pair<Integer , Integer> pSecond = new Pair<>(matcher.start(), matcher.end());
             p.first=s;
             p.second=pSecond;
             Container.add(p);
@@ -108,8 +107,8 @@ public class getExpression {
         Matcher matcher=pattern.matcher(str);
         while (matcher.find()){
             String s = matcher.group(1);
-            Pair<String , Pair< Integer , Integer>> p=new Pair<>();
-            Pair<Integer , Integer> pSecond =new Pair<>( matcher.start(),matcher.end());
+            Pair<String , Pair< Integer , Integer>> p= new Pair<>();
+            Pair<Integer , Integer> pSecond = new Pair<>(matcher.start(), matcher.end());
             p.first=s;
             p.second=pSecond;
             Strings.add(p);
@@ -126,12 +125,11 @@ public class getExpression {
 
     private boolean OverLap(int start, int end, Pair p ) {
         if(start<(int)p.first&&end<(int)p.second)return false;
-        if(start>(int)p.first&&end>(int)p.second)return false;
-        return true;
+        return start <= (int) p.first || end <= (int) p.second;
     }
 
 
-    private  class  Pair < a , b > {
+    private static class  Pair < a , b > {
         a first;
         b second;
         Pair(a first , b second){

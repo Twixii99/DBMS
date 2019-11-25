@@ -12,7 +12,7 @@ import java.util.LinkedList;
 class ReadTables {
 
     static LinkedList<Table> ReadTables(String Path) throws Exception {
-        String tablesName[]=new File(Path).list();
+        String[] tablesName =new File(Path).list();
         LinkedList<Table> tables=new LinkedList<>();
         for(int i=0;i<tablesName.length;i++){
             tables.add(MakeTable(tablesName[i],Path));
@@ -33,7 +33,7 @@ class ReadTables {
 
     private static String[] GetString(Class[] types) throws Exception {
         int i=0;
-        String str[]=new String[types.length];
+        String[] str =new String[types.length];
         for(Class c :types){
             if(c==String.class){
                 str[i++]="String";
