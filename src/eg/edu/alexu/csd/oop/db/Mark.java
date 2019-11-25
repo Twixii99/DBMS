@@ -368,24 +368,24 @@ class Mark {
         DataStack.push(!b);
     }
 
-    private void Mark()
+   private void Mark()
     {
-        System.out.println(Expression);
         for(int i=0;i<column.length;i++)
         {
             if(Types[i]==String.class){
-                Replace(" "+column[i].toLowerCase(),((String) Data[i]).toLowerCase());
+               boolean x = Replace(" "+column[i].toLowerCase(),((String) Data[i]).toLowerCase());
+               if(x)i--;
             }else {
-                Replace(" "+column[i],String.valueOf(Data[i]));
+               boolean x = Replace(" "+column[i],String.valueOf(Data[i]));
+               if(x)i--;
             }
         }
-        System.out.println(Expression);
     }
-    private void Replace(String ReplaceIt,String ReplaceWith)
+    private boolean Replace(String ReplaceIt,String ReplaceWith)
     {
         Pattern pattern=Pattern.compile(ReplaceIt.toLowerCase());
         Matcher matcher=pattern.matcher(Expression.toLowerCase());
-        while (matcher.find())
+        if (matcher.find())
         {
             int begin=matcher.start();
             int end=matcher.end();
@@ -399,10 +399,13 @@ class Mark {
             if(FindBefore&&FindAfter&&bound)
             {
                 Expression = new StringBuilder(Expression).replace(begin+1,end,ReplaceWith).toString();
-            }
-        }
-    }
 
+            }
+            return true;
+        }
+        return false;
+    }
+    
     private boolean after(int x) {
         for(int i = x; i< Expression.length(); i++){
             if(Expression.charAt(i)==' ')continue;
