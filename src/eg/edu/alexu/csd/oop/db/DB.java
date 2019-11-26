@@ -11,12 +11,15 @@ public class DB implements Database {
     private List<Object> data;
     private String[] actualHeaders;
     private Class[] actualTypes;
-
+    private String directoryOfDatabases = "DataBasesDirectory";
     DB(){
     }
 
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
+        File direct = new File(directoryOfDatabases);
+        if(!direct.exists()) direct.mkdirs();
+        databaseName = directoryOfDatabases + System.getProperty("file.separator")+databaseName;
         File file = new File(databaseName);
         boolean exist = file.exists() ;
         if( exist && !dropIfExists ){ //if exist and not drop >> use it
@@ -97,7 +100,7 @@ public class DB implements Database {
             }
             if ((Boolean) resultOfQuery.get(0)) { //drop DataBase
                 String dataName = (String) resultOfQuery.get(1);
-                dropDirectory(dataName);
+                dropDirectory(directoryOfDatabases+System.getProperty("file.separator")+dataName);
                 this.tables=new LinkedList<>();
                 this.path = null;
 
@@ -317,7 +320,7 @@ public class DB implements Database {
 
     private Table getTable(String tableName){
         for (Table table : tables) {
-            if (table.getName().equals(tableName)) {
+            if (table.getName().equalsIgnoreCase(tableName)) {
                 return table;
             }
         }
