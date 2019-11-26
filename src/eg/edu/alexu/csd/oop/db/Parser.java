@@ -221,7 +221,7 @@ class Parser {
                 // contains where
                 String tableName = query1.replaceAll("(?i)^.+FROM\\s+", "").replaceAll("(?i)\\s+WHERE.+$", "");
                 result.add(tableName);
-                String condition = query1.replaceAll("(?i)^.+FROM\\s+.+WHERE\\s+", "");
+                String condition = query1.replaceAll("(?i)^.+FROM\\s+.+WHERE\\s+", "").replaceAll("'","\"");
                 result.add(condition);
             } else {
                 // doesn't contain where
@@ -258,7 +258,7 @@ class Parser {
                 condition = "";
             }
             result.add(tableName);
-            result.add(condition);
+            result.add(condition.replaceAll("'","\"")); // because Mark doesn't deal with single quotes in it
             return result;
         }
         return null;
@@ -325,7 +325,7 @@ class Parser {
     private static String[] removeSpaces(String[] array) {
         String[] tempArray = new String[array.length];
         for (int i = 0; i < array.length; i++) {
-            tempArray[i] = array[i].replaceAll("\\s+", "");
+            tempArray[i] = array[i].replaceAll("\\s+", "").replaceAll("'","\"");
         }
         return tempArray;
     }
