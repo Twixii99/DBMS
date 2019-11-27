@@ -42,6 +42,7 @@ class Parser {
             return "";
         } else if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$")){
             Object[][] selectedTable = dummyDataBase.executeQuery(query);
+            if(selectedTable==null)return null;
             StringBuilder stringBuilder = new StringBuilder();
             for (Object[] objects : selectedTable) {
                 for (int j = 0; j < objects.length; j++) {
@@ -104,6 +105,7 @@ class Parser {
             } else if (query1.matches("(?i)^\\s*TABLE\\s+.+")) { // done
                 // we are dealing with table
                 // example: "create table table_name values ( names varchar, phone int, email varchar);"
+                query1=query1.replace("(" ," (");
                 if(!query1.matches(".+\\)\\s*$") || query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*$")) return null;
                 result.add(false);
                 String tableName = query1;
