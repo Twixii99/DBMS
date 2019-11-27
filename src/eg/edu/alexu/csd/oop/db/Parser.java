@@ -22,6 +22,7 @@ class Parser {
         String command;
         do {
             command = scanner.nextLine();
+            command = command.trim();
             System.out.print(parse(command));
         } while (!command.equalsIgnoreCase(".quit"));
     }
@@ -75,6 +76,9 @@ class Parser {
      * returns null if the query doesn't match
      */
     static LinkedList<Object> parseCreate(String query) throws SQLException {
+        if(!query.matches("(?i)^\\s*CREATE\\s+DATABASE\\s+\\w+\\s*(DROP\\s+IF\\s+EXIST\\s*)?$")
+            && !(query.matches("(?i)^\\s*CREATE\\s+TABLE.+") ) ) return null;
+
         if (query.matches("(?i)^\\s*CREATE.+$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
@@ -93,18 +97,20 @@ class Parser {
                     dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
                     dropIfExist = true;
                 }
+
                 result.add(dataBaseName);
                 result.add(dropIfExist);
                 return result;
             } else if (query1.matches("(?i)^\\s*TABLE\\s+.+")) { // done
                 // we are dealing with table
                 // example: "create table table_name values ( names varchar, phone int, email varchar);"
+                if(!query1.matches(".+\\)\\s*$") || query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*$")) return null;
                 result.add(false);
                 String tableName = query1;
-                tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s+VALUES.+\\s*$", "");
+                tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s+(VALUES)?.+\\s*$", "");
                 result.add(tableName);
                 result.add(false);
-                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "(?i)\\s+VALUES\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*$", "").split(",");
+                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "(?i)\\s+(VALUES)?\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*$", "").split(",");
                 // dataStyle will look like "[name varchar, phone int, email varchar]"
                 String[] headers = new String[dataStyle.length];
                 String[] types = new String[dataStyle.length];

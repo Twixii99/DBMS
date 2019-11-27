@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import eg.edu.alexu.csd.oop.db.DB;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -270,7 +271,8 @@ public class SmokeTest {
     
     @Test
     public void testConditionalSelect() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+    	//Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Select", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name13(column_name1 varchar, column_name2 int, column_name3 varchar)");

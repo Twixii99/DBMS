@@ -12,7 +12,7 @@ public class DB implements Database {
     private String[] actualHeaders;
     private Class[] actualTypes;
     private String directoryOfDatabases = "DataBasesDirectory";
-    DB(){
+    public DB(){
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DB implements Database {
     public boolean executeStructureQuery(String query) throws SQLException {
         if(query.matches("(?i)^create .+")) { //starts with create
             LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
-            if (resultOfQuery == null){
+            if (resultOfQuery == null ||(  resultOfQuery.size()!=3 &&  resultOfQuery.size()!=5) ){
                 System.out.println("Wrong create command");
                 return false;
             }
@@ -87,14 +87,18 @@ public class DB implements Database {
                 }
                 String[] namesOfColumns = (String[]) resultOfQuery.get(3);
                 String[] types = (String[]) resultOfQuery.get(4);
+                if(tableName == null || namesOfColumns[0] == null || types[0] == null ){
+                    System.out.println("Wrong table initialization");
+                    return false;
+                }
                 Table t = new Table(tableName, namesOfColumns, types);
                 addTable(t);
                 XML.convertIntoXml(path, t);
             }
         }
-        else { //starts with drop
+        else if (query.matches("(?i)^drop.+")){ //starts with drop
             LinkedList<Object> resultOfQuery = Parser.parseDrop(query);
-            if (resultOfQuery == null){
+            if (resultOfQuery == null || resultOfQuery.size()!=2){
                 System.out.println("wrong query");
                 return false;
             }

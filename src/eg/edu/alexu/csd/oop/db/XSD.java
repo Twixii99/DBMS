@@ -16,6 +16,11 @@ class XSD {
     private static LinkedList<Class> TYPES=new LinkedList<>();
     static void MakeXsd(String Path, Table tables)  {
 
+        if(tables.getHeaders() == null || tables.getTypes()==null){
+            System.out.println("Wrong table initialization");
+            return;
+        }
+
         File dbfile=new File(Path+".xsd");
         try {
             dbfile.createNewFile();
@@ -29,9 +34,6 @@ class XSD {
             String s=getBeginOfXsd(tables.getName());
             str.append(s);
             writer.write(s);
-
-            System.out.println(tables.getTypes()[0]);
-
             s=getDataXsd(tables.getHeaders(),tables.getTypes());
             writer.write(s);
 

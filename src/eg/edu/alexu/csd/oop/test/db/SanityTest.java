@@ -3,6 +3,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import eg.edu.alexu.csd.oop.db.DB;
 import org.junit.*;
 
 import eg.edu.alexu.csd.oop.db.Database;
