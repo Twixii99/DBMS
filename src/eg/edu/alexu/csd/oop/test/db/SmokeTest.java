@@ -36,7 +36,7 @@ public class SmokeTest {
     @Test
     public void testCreateAndOpenAndDropDatabase() {
         File dummy = null;
-        Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         {
             File dbDir = createDatabase_static(db, "SaMpLe", true);
             String files[] = dbDir.list();

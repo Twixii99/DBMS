@@ -68,7 +68,7 @@ public class DB implements Database {
             LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
             if (resultOfQuery == null ||(  resultOfQuery.size()!=3 &&  resultOfQuery.size()!=5) ){
                 System.out.println("Wrong create command");
-                return false;
+                throw new SQLException();
             }
             if ((Boolean) resultOfQuery.get(0)) { //create DataBase
                 String dataName = (String) resultOfQuery.get(1);
@@ -77,12 +77,11 @@ public class DB implements Database {
             } else { //create a table
                 if (path == null) {
                     System.out.println("no database initialized");
-                    return false;
+                    throw new SQLException();
                 }
                 String tableName = (String) resultOfQuery.get(1);
                 File tablePath = new File(path+System.getProperty("file.separator")+tableName);
                 if (tablePath.exists()) {
-                    System.out.println(path+System.getProperty("file.separator")+tableName);
                     System.out.println("table is already existed");
                     return false;
                 }
@@ -137,11 +136,11 @@ public class DB implements Database {
             columns = headers;
         }
         // when ahmed finished it
-        LinkedList<Object> references = new LinkedList<>();
+        LinkedList<Object[]> references = new LinkedList<>();
         if (!condition.equals("")){
             Mark mark = new Mark();
             try{
-                references = (LinkedList<Object>) mark.getData(condition,getTable(tableName));
+                references = mark.getData(condition,getTable(tableName));
             } catch (Exception e){
                 System.out.println(e.getMessage());
                 return null;
@@ -164,7 +163,14 @@ public class DB implements Database {
                 k++;
             }
         }
+        for(int i =0 ;i<arr.length;i++){
+            for(int j=0;j<arr[0].length;j++){
+                System.out.print(arr[i][j]+" | ");
+            }
+            System.out.println("");
+        }
         return arr;
+
     }
 
     @Override
@@ -195,14 +201,18 @@ public class DB implements Database {
         if(data == null)
             return -1;
         Table operateOnTable = this.existance(data.get(0).toString());
+
         if(operateOnTable != null) {
             String[] headers = (String[])data.get(1);
+            toLowerCaseConverter(headers, headers.length);
             String[] values = (String[])data.get(2);
-            if(headers.length != values.length) return 0;
+            if(headers.length != values.length) return -1;
             actualHeaders = operateOnTable.getHeaders();
+            toLowerCaseConverter(actualHeaders, actualHeaders.length);
             actualTypes = operateOnTable.getTypes();
             if(this.containsTheseHeaders(headers, values)) {
                 String[] strings = this.rearrange(headers, values);
+                //for(String c : strings) System.out.println(c);
                 operateOnTable.add(convertToObjects(strings));
                 return 1;
             }
@@ -215,7 +225,9 @@ public class DB implements Database {
     private Object[] convertToObjects(String[] str) {
         Object[] obj = new Object[str.length];
         int i = 0;
+        if(str[0] == null) System.out.println("str is null");
         for(String temp : str) {
+
             if(temp.matches("^[0-9]+$"))
                 obj[i++] = Integer.parseInt(temp);
             else if(temp.matches("(?i).*true|false.*"))
@@ -234,18 +246,12 @@ public class DB implements Database {
         if(deleteFromTable != null) {
             if((String)data.get(1) == "") {
                 deleteFromTable.emptyTheTable();
+                return deleteFromTable.getTable().size();
             } else {
-                LinkedList<Object> deletedRows = mark.getData(data.get(1).toString(), deleteFromTable);
-                Iterator<Object> deletedRecords = deletedRows.iterator();
-                while(deletedRecords.hasNext()) {
-                    Object[] thisRecord = (Object[])deletedRecords.next();
-                    this.actualHeaders = deleteFromTable.getHeaders();
-                    for(int i = 0; i < actualHeaders.length; ++i) {
-                        if(thisRecord[i] != null) {
-                            deleteFromTable.removeRecord(actualHeaders[i], thisRecord[i]);
-                        }
-                    }
-                }
+                LinkedList<Object[]> deletedRows = mark.getData(data.get(1).toString(), deleteFromTable);
+                System.out.println(deletedRows);
+                deleteFromTable.removeRecord(deletedRows);
+                System.out.println(deletedRows.size()+"  size deleted");
                 return deletedRows.size();
             }
         }
@@ -253,7 +259,7 @@ public class DB implements Database {
     }
 
     private int excuteUpdate(String query) throws Exception {
-        LinkedList<Object> markedList = new LinkedList<>();
+        LinkedList<Object[]> markedList = new LinkedList<>();
         data = Parser.parseUpdate(query);
         if(data == null)
             return 0;
@@ -313,17 +319,20 @@ public class DB implements Database {
                     }
                     else return false;
                 }
-            }
+            } else
+                return false;
         }
         return i == headers.length;
     }
 
     private String[] rearrange(String[] headers, String[] values) {
         LinkedList<String> headersList = new LinkedList<String>(Arrays.asList(headers));
+
         String[] dummy = new String[actualHeaders.length];
-        for(int i = 0; i < headersList.size(); ++i) {
+        for(int i = 0; i < headersList.size(); ++i){
             int index = Arrays.asList(actualHeaders).indexOf((headersList.get(i)));
-            dummy[index] = values[i];
+            if(index != -1)
+                dummy[index] = values[i];
         }
         return dummy;
     }
@@ -354,6 +363,10 @@ public class DB implements Database {
     }
     private void removeTable (Table table){
         this.tables.remove(table);
+    }
+    private void toLowerCaseConverter(String[] arr, int length) {
+        for(int i = 0; i < length; ++i)
+            arr[i] = arr[i].toLowerCase();
     }
 
 }

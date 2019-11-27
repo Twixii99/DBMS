@@ -50,7 +50,14 @@ class getExpression {
         if(AlOWSTRING(first)){
             return first;
         }
+        if(IsBool(first)){
+            return Boolean.parseBoolean(first.toLowerCase());
+        }
         throw new SQLException(first +" isn't a column in the table ");
+    }
+
+    private boolean IsBool(String first) {
+        return first.equalsIgnoreCase("true")||first.equalsIgnoreCase("false");
     }
 
     private boolean AlOWSTRING(String first) {

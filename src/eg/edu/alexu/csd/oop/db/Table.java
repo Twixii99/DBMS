@@ -79,6 +79,14 @@ public class Table {
         }
     }
 
+    public void removeRecord(LinkedList<Object[]> removed) {
+        for(int i = 0; i < removed.size(); ++i) {
+            if(getTable().contains(removed.get(i)))
+                System.out.println("EXIST");
+            this.getTable().remove(removed.get(i));
+        }
+    }
+
     // returns the innerIDs if the mentioned record
     private LinkedList<Integer> indexOf(String header, Object value) {
         // find the index of the header in (the index of the column).

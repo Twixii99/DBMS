@@ -138,7 +138,6 @@ class Mark {
                 allowForOperation=true;
             }
             else{
-                System.out.println(o);
                 throw new NumberFormatException();
             }
         }
@@ -368,16 +367,16 @@ class Mark {
         DataStack.push(!b);
     }
 
-   private void Mark()
+    private void Mark()
     {
         for(int i=0;i<column.length;i++)
         {
             if(Types[i]==String.class){
-               boolean x = Replace(" "+column[i].toLowerCase(),((String) Data[i]).toLowerCase());
-               if(x)i--;
+                boolean x = Replace(" "+column[i].toLowerCase(),((String) Data[i]).toLowerCase());
+                if(x)i--;
             }else {
-               boolean x = Replace(" "+column[i],String.valueOf(Data[i]));
-               if(x)i--;
+                boolean x = Replace(" "+column[i],String.valueOf(Data[i]));
+                if(x)i--;
             }
         }
     }
@@ -405,7 +404,7 @@ class Mark {
         }
         return false;
     }
-    
+
     private boolean after(int x) {
         for(int i = x; i< Expression.length(); i++){
             if(Expression.charAt(i)==' ')continue;
