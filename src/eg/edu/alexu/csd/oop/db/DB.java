@@ -82,6 +82,7 @@ public class DB implements Database {
                 String tableName = (String) resultOfQuery.get(1);
                 File tablePath = new File(path+System.getProperty("file.separator")+tableName);
                 if (tablePath.exists()) {
+                    System.out.println(path+System.getProperty("file.separator")+tableName);
                     System.out.println("table is already existed");
                     return false;
                 }
@@ -100,7 +101,7 @@ public class DB implements Database {
             LinkedList<Object> resultOfQuery = Parser.parseDrop(query);
             if (resultOfQuery == null || resultOfQuery.size()!=2){
                 System.out.println("wrong query");
-                return false;
+                throw new SQLException();
             }
             if ((Boolean) resultOfQuery.get(0)) { //drop DataBase
                 String dataName = (String) resultOfQuery.get(1);
@@ -113,7 +114,7 @@ public class DB implements Database {
                 Table t = getTable(tableName);
                 if (t == null ) {
                     System.out.println("table name not exist!");
-                    return false;
+                    throw new SQLException();
                 }
                 removeTable(t);
                 dropDirectory(path+System.getProperty("file.separator")+tableName);
@@ -217,7 +218,7 @@ public class DB implements Database {
         for(String temp : str) {
             if(temp.matches("^[0-9]+$"))
                 obj[i++] = Integer.parseInt(temp);
-            else if(temp.matches("(?i).*true|flase.*"))
+            else if(temp.matches("(?i).*true|false.*"))
                 obj[i++] = Boolean.parseBoolean(temp);
             else
                 obj[i++] = temp;
@@ -242,10 +243,10 @@ public class DB implements Database {
                     for(int i = 0; i < actualHeaders.length; ++i) {
                         if(thisRecord[i] != null) {
                             deleteFromTable.removeRecord(actualHeaders[i], thisRecord[i]);
-                            return deletedRows.size();
                         }
                     }
                 }
+                return deletedRows.size();
             }
         }
         return -1;
@@ -294,17 +295,22 @@ public class DB implements Database {
         for(i = 0; i < headers.length; ++i) {
             if(actualHeadersAsList.contains(headers[i])) {
                 int index = actualHeadersAsList.indexOf(headers[i]);
-                if(actualTypes[index].toString().equals("class java.lang.Integer")) {
-                    if(!values[i].matches("(?i)[^a-z]$")){
+                if(actualTypes[index].toString().equals("(?i)(class java.lang.Integer)")) {
+                    System.out.println("im in outer integer");
+                    if(values[i].matches("(?i)[^a-z]$")){
+                        System.out.println("im in integer");
                         continue;
                     }
                     else {
                         return false;
                     }
                 }
-                else if(actualTypes[index].toString().equals("class java.lang.Boolean")) {
-                    if(!values[i].matches("(?i).*true.*|.*false.*"))
+                else if(actualTypes[index].toString().equals("(?i)(class java.lang.Boolean)")) {
+                    System.out.println("im in outer boolean");
+                    if(values[i].matches("(?i).*(false)|(true).*")) {
+                        System.out.println("im in boolean");
                         continue;
+                    }
                     else return false;
                 }
             }

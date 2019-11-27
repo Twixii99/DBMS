@@ -23,6 +23,7 @@ class Parser {
         do {
             command = scanner.nextLine();
             command = command.trim();
+            command = command.replace('\'','\"');
             System.out.print(parse(command));
         } while (!command.equalsIgnoreCase(".quit"));
     }
@@ -142,7 +143,7 @@ class Parser {
      * returns a linked list of objects
      * at index = 0, a Boolean Object it is true if it is to drop a database, and false if to drop a table
      * at index = 1, a String object to tell you the name of database or the name of the table
-     * put in your mind that you have to use type cast when dealing with the return value
+     * put in your mind that you have to use type cast when deaboling with the return value
      * like : "Boolean value = (Object[]) Parser.parseDrop(query).get(0);" (Boolean not boolean)
      * returns null if the query doesn't match
      */

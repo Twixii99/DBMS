@@ -26,7 +26,7 @@ public class SanityTest {
 
 	@Test
 	public void testWrongQuery() {
-		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+		DB db = new DB();
 
 		try {
 			createDatabase(db, "TestDB", true);
@@ -106,7 +106,7 @@ public class SanityTest {
 	@Test
 	public void testCaseInsensitive()
 	{
-		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+		DB db = new DB();
 		createDatabase(db, "TestDB", true);
 
 		try {
@@ -127,7 +127,7 @@ public class SanityTest {
 	@Test
 	public void testScenario_1()
 	{
-		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+		DB db = new DB();
 
 		try {
 			boolean created = db.executeStructureQuery("CREATE DATABASE TestDB");
@@ -158,7 +158,7 @@ public class SanityTest {
 	@Test
 	public void testScenario_2()
 	{
-		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+		DB db = new DB();
 
 		try {
 			boolean created = db.executeStructureQuery("CREATE DATABASE TestDB");
@@ -203,7 +203,7 @@ public class SanityTest {
 	@Test
 	public void testScenario_3()
 	{
-		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+		DB db = new DB();
 
 		try {
 			createDatabase(db, "TestDB", true);

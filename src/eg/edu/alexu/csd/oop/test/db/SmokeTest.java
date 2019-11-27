@@ -64,7 +64,8 @@ public class SmokeTest {
 
     @Test
     public void testCreateTable() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+    	//Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+    	DB db = new DB();
         File dbDir = createDatabase(db, "TestDB_Create", true);
         try {
             String filesBefore[] = dbDir.list();
@@ -92,7 +93,7 @@ public class SmokeTest {
     
     @Test
     public void testCreateTableWithoutDB() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+    	DB db = new DB();
         try {
             db.executeStructureQuery("CREATE TABLE table_name2(column_name1 varchar, column_name2 int, column_name3 varchar)");
             Assert.fail("Table created without database!!");
@@ -102,7 +103,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithoutColumnNames() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name3(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -115,7 +116,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithColumnNames() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name4(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -128,7 +129,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithWrongColumnNames() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name5(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -140,7 +141,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithWrongColumnCount() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name6(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -152,7 +153,7 @@ public class SmokeTest {
 
     @Test
     public void testUpdate() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name7(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -171,7 +172,7 @@ public class SmokeTest {
     
     @Test
     public void testConditionalUpdate() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name8(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -190,7 +191,7 @@ public class SmokeTest {
 
     @Test
     public void testUpdateEmptyOrInvalidTable() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name9(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -210,7 +211,7 @@ public class SmokeTest {
     
     @Test
     public void testDelete() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name10(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -229,7 +230,7 @@ public class SmokeTest {
     
     @Test
     public void testConditionalDelete() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name11(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -248,7 +249,7 @@ public class SmokeTest {
 
     @Test
     public void testSelect() {
-    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
+        DB db = new DB();
         createDatabase(db, "TestDB_Select", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name12(column_name1 varchar, column_name2 int, column_name3 varchar)");
