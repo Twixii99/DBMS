@@ -65,28 +65,14 @@ public class Table {
         return false;
     }
 
-    // removes if the record matching the inputs in exist
-    public void removeRecord(String header, Object value) {
-        LinkedList<Integer> indexes = indexOf(header, value);
-        if (!indexes.isEmpty()) {
-            Iterator<Object[]> iterator = table.listIterator();
-            while (iterator.hasNext() && !indexes.isEmpty()) {
-                Object[] record = iterator.next();
-                if (indexes.contains((Integer) record[0])) {
-                    indexes.remove((Integer) record[0]);
-                    iterator.remove();
-                }
-            }
+    public void removeRecord(Object[] record) {
+        for(int i =  getTable().size()-1 ; i>=0 ; i--){
+            if (Arrays.equals(record, getTable().get(i))) this.table.remove(i);
         }
     }
 
-    void removeRecord(LinkedList<Object> removed) {
-        for (Object o : removed) {
-            if (getTable().contains((Object[]) o)){
-                System.out.println("EXIST");
-                this.getTable().remove((Object[]) o);
-            }
-        }
+    public void emptyTheTable(){
+        this.table = new LinkedList<>();
     }
 
     // returns the innerIDs if the mentioned record
@@ -113,29 +99,25 @@ public class Table {
         return indexes;
     }
 
-    // as you know that we only update value by value
-    void updateRecord(String header, Object oldValue, Object newValue) {
-        // get the index of header in headers
-        int j = 0;
-        for (j = 0; j < headers.length; j++) {
-            if (headers[j].equalsIgnoreCase(header)) {
-                break;
+    public void updateRecord(Object[] record, Object[] newRecord) {
+        for(int i =  getTable().size()-1 ; i>=0 ; i--) {
+            if (Arrays.equals(record, getTable().get(i))) {
+                Object[] mom = new Object[newRecord.length+1];
+                mom[0] = Arrays.asList(table.get(i)).get(0);
+                System.arraycopy(newRecord, 0, mom, 1, newRecord.length);
+                this.table.set(i, mom);
             }
         }
-        // update the record(s) matching the inputs
-        LinkedList<Integer> indexes = indexOf(header, oldValue);
-        if ((oldValue.getClass().equals(newValue.getClass())) && (!indexes.isEmpty())) {
-            ListIterator<Object[]> iterator = table.listIterator();
-            while (iterator.hasNext() && !indexes.isEmpty()) {
-                Object[] record = iterator.next();
-                if (indexes.contains((Integer) record[0])) {
-                    indexes.remove((Integer) record[0]);
-                    Object[] newRecord = new Object[record.length];
-                    System.arraycopy(record, 0, newRecord, 0, record.length);
-                    newRecord[j] = newValue;
-                    iterator.set(newRecord);
-                }
-            }
+    }
+
+    public void updateHoleTable(Object[] newRecord, int[] indexes) {
+        for(ListIterator<Object[]> i = table.listIterator(); i.hasNext();) {
+            Object[] dummy = i.next();
+            int j = 0;
+            for(int x : indexes)
+                dummy[x] = newRecord[j++];
+            i.set(dummy);
+            j = 0;
         }
     }
 
@@ -207,20 +189,6 @@ public class Table {
         return null;
     }
 
-    public void updateHoleTable(String[] newValue) {
-        if (true) {
-            Object[] tempRecord = new Object[newValue.length + 1];
-            System.arraycopy(newValue, 0, tempRecord, 1, newValue.length);
-            lastRecordId = 0;
-            tempRecord[0] = lastRecordId;
-            int i = 0;
-            for (Object[] objects : table) {
-                table.set(i++, tempRecord);
-            }
-        }
-    }
-
-
     // get the order by which you added this/there record(s), and returns empty linkedlist if it didn't find any suitable record
     public LinkedList<Integer> getInnerID(String header, Object value) {
         return indexOf(header, value);
@@ -276,13 +244,13 @@ public class Table {
         return this.headers.length - 1;
     }
 
-    void emptyTheTable(){
-        this.table = new LinkedList<>();
+    public Object[] getRandomCol() {
+        if(table != null)
+            return this.table.get(0);
+        return null;
     }
 
-    void removeRecord(Object[] record) {
-        for(int i =  getTable().size()-1 ; i>=0 ; i--){
-            if (Arrays.equals(record, getTable().get(i))) this.table.remove(i);
-        }
+    public int getSize() {
+        return this.table.size();
     }
 }
