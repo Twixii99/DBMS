@@ -12,8 +12,10 @@ import java.util.LinkedList;
 class ReadTables {
 
     static LinkedList<Table> ReadTables(String Path) throws Exception {
-        String[] tablesName =new File(Path).list();
-        LinkedList<Table> tables=new LinkedList<>();
+        String[] tablesName=null;
+        tablesName  =new File(Path).list();
+        if (tablesName == null)return new LinkedList<>();
+        LinkedList<Table> tables = new LinkedList<>();
         for(int i=0;i<tablesName.length;i++){
             tables.add(MakeTable(tablesName[i],Path));
         }

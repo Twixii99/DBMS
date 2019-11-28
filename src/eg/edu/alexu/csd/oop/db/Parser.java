@@ -9,12 +9,7 @@ class Parser {
     private Scanner scanner = new Scanner(System.in);
 
     Parser() throws Exception {
-        try{
             run();
-        }
-        catch (Exception ignored){
-
-        }
 /*        create database d1
         create table t1 values (name varchar, phone int, email varchar)
         insert into t1 (name, phone, email) values ('abc', 123, 'abc@email.com')

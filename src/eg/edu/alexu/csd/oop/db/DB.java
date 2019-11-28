@@ -14,7 +14,6 @@ public class DB implements Database {
     private String directoryOfDatabases = "DataBasesDirectory";
     public DB(){
     }
-
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
         File direct = new File(directoryOfDatabases);
@@ -27,8 +26,7 @@ public class DB implements Database {
             try {
                 tables = ReadTables.ReadTables(databaseName);
             }
-            catch (Exception e) {
-                return e.getMessage();
+            catch (Exception ignored) {
             }
             return databaseName;
         }
@@ -44,9 +42,8 @@ public class DB implements Database {
             tables = new LinkedList<>();
             return databaseName;
         }
-        else return "not created";
+        else return databaseName;
     }
-
     private void dropDirectory(String path){ //this function can delete a directory and all its contents
         File oldData = new File(path);
         String[]entries = oldData.list();
@@ -61,7 +58,6 @@ public class DB implements Database {
         File directory = new File(path);
         return directory.mkdirs();
     }
-
     @Override
     public boolean executeStructureQuery(String query) throws SQLException {
         if(query.matches("(?i)^create .+")) { //starts with create
@@ -117,7 +113,6 @@ public class DB implements Database {
         }
         return true;
     }
-
     @Override
     public Object[][] executeQuery(String query) throws SQLException {
         LinkedList<Object> result = Parser.parseSelect(query);
@@ -168,7 +163,6 @@ public class DB implements Database {
         return arr;
 
     }
-
     @Override
     public int executeUpdateQuery(String query) throws Exception {
         if(query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$"))
@@ -179,7 +173,6 @@ public class DB implements Database {
             return this.excuteUpdate(query);
         return -1;
     }
-
     /**
      * @param
      *      query of type string the query
@@ -217,7 +210,6 @@ public class DB implements Database {
         }
         return -1;
     }
-
     private Object[] convertToObjects(String[] str) {
         Object[] obj = new Object[str.length];
         int i = 0;
@@ -233,7 +225,6 @@ public class DB implements Database {
         }
         return obj;
     }
-
     private int excuteDelete(String query) throws Exception {
         data = Parser.parseDelete(query);
         if(data == null)
@@ -254,7 +245,6 @@ public class DB implements Database {
         }
         return -1;
     }
-
     private int excuteUpdate(String query) throws Exception {
         LinkedList<Object[]> markedList = new LinkedList<>();
         data = Parser.parseUpdate(query);
@@ -287,11 +277,9 @@ public class DB implements Database {
         }
         return markedList.size();
     }
-
     private Table existance(String tableName) {
             return this.getTable(tableName);
     }
-
     private Boolean containsTheseHeaders(String[] headers, String[] values) {
         LinkedList<String> actualHeadersAsList = new LinkedList<String>(Arrays.asList(actualHeaders));
         int i;
@@ -321,7 +309,6 @@ public class DB implements Database {
         }
         return i == headers.length;
     }
-
     private String[] rearrange(String[] headers, String[] values) {
         LinkedList<String> headersList = new LinkedList<String>(Arrays.asList(headers));
 
@@ -333,7 +320,6 @@ public class DB implements Database {
         }
         return dummy;
     }
-
     private Table getTable(String tableName){
         for (Table table : tables) {
             if (table.getName().equalsIgnoreCase(tableName)) {
@@ -342,7 +328,6 @@ public class DB implements Database {
         }
         return null;
     }
-
     String schema(){
         StringBuilder stringBuilder = new StringBuilder("");
         Iterator<Table> tableIterator = tables.listIterator();
@@ -354,7 +339,6 @@ public class DB implements Database {
         }
         return stringBuilder.toString();
     }
-
     private void addTable(Table table){
         this.tables.add(table);
     }
@@ -365,5 +349,4 @@ public class DB implements Database {
         for(int i = 0; i < length; ++i)
             arr[i] = arr[i].toLowerCase();
     }
-
 }
