@@ -67,8 +67,7 @@ public class DB implements Database {
         if(query.matches("(?i)^create .+")) { //starts with create
             LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
             if (resultOfQuery == null ||(  resultOfQuery.size()!=3 &&  resultOfQuery.size()!=5) ){
-                System.out.println("Wrong create command");
-                throw new SQLException();
+                throw new SQLException("Wrong create command");
             }
             if ((Boolean) resultOfQuery.get(0)) { //create DataBase
                 String dataName = (String) resultOfQuery.get(1);
@@ -76,8 +75,7 @@ public class DB implements Database {
                 createDatabase(dataName, drop);
             } else { //create a table
                 if (path == null) {
-                    System.out.println("no database initialized");
-                    throw new SQLException();
+                    throw new SQLException("no database initialized");
                 }
                 String tableName = (String) resultOfQuery.get(1);
                 File tablePath = new File(path+System.getProperty("file.separator")+tableName);
@@ -99,8 +97,7 @@ public class DB implements Database {
         else if (query.matches("(?i)^drop.+")){ //starts with drop
             LinkedList<Object> resultOfQuery = Parser.parseDrop(query);
             if (resultOfQuery == null || resultOfQuery.size()!=2){
-                System.out.println("wrong query");
-                throw new SQLException();
+                throw new SQLException("wrong query");
             }
             if ((Boolean) resultOfQuery.get(0)) { //drop DataBase
                 String dataName = (String) resultOfQuery.get(1);
@@ -112,8 +109,7 @@ public class DB implements Database {
                 String tableName = (String) resultOfQuery.get(1);
                 Table t = getTable(tableName);
                 if (t == null ) {
-                    System.out.println("table name not exist!");
-                    throw new SQLException();
+                    throw new SQLException("table name not exist!");
                 }
                 removeTable(t);
                 dropDirectory(path+System.getProperty("file.separator")+tableName);

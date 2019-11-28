@@ -9,7 +9,12 @@ class Parser {
     private Scanner scanner = new Scanner(System.in);
 
     Parser() throws Exception {
-        run();
+        try{
+            run();
+        }
+        catch (Exception ignored){
+
+        }
 /*        create database d1
         create table t1 values (name varchar, phone int, email varchar)
         insert into t1 (name, phone, email) values ('abc', 123, 'abc@email.com')
@@ -24,7 +29,12 @@ class Parser {
             command = scanner.nextLine();
             command = command.trim();
             command = command.replace('\'','\"');
-            System.out.print(parse(command));
+            try{
+                System.out.print(parse(command));
+            }
+            catch (Exception e){
+                System.out.println(e.getMessage());
+            }
         } while (!command.equalsIgnoreCase(".quit"));
     }
 

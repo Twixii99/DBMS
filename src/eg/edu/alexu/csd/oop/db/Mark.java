@@ -32,7 +32,7 @@ class Mark {
     private  Stack<Object> OperationStack=new Stack<>();
     private Stack<Object> DataStack=new Stack<>();
 
-    LinkedList<Object[]> getData(String Express, Table table) throws SQLException {
+    LinkedList<Object[]> getData(String Express, Table table) throws Exception {
 
         LinkedList<Object[]> correct=new LinkedList<>();
         String TempExpreetion=Spaces(Express);
@@ -103,15 +103,14 @@ class Mark {
     }
 
 
-    private void Calc() {
+    private void Calc() throws Exception {
         for (Object o : operation) {
             Distibute(o);
         }
         DeathStack();
     }
 
-    private void Distibute(Object o)
-    {
+    private void Distibute(Object o) throws Exception {
         if(PrimaryOperation(o)||comparitionOperation(o))
         {
             AppendOperation(o);
@@ -138,12 +137,12 @@ class Mark {
                 allowForOperation=true;
             }
             else{
-                throw new NumberFormatException();
+                throw new Exception("error in expression after where");
             }
         }
     }
 
-    private void DeathPrantetes() {
+    private void DeathPrantetes() throws Exception {
         while (!OperationStack.empty()&&(OperationStack.peek().getClass()!=Character.class||(char)OperationStack.peek()!='(')){
             Object o=OperationStack.peek();
             if(PrimaryOperation(o))RemovePrimaryOperation();
@@ -152,22 +151,22 @@ class Mark {
             else if(o.equals("or")){
                 RemoveOR();
             }
-            else  throw new NumberFormatException();
-
+            else  throw new Exception("error in expression after where");
         }
 
         if((char)OperationStack.peek()!='('){
-            throw new NumberFormatException();
+            throw new Exception("not found ( ");
         }
         OperationStack.pop();
         if(!OperationStack.empty()&&OperationStack.peek().equals("not")){
             if(DataStack.peek().getClass()==Boolean.class)
                 RemoveNotDeath();
-            else throw new NumberFormatException();
+            else  throw new Exception("expected bool after not  ");
         }
     }
 
     private boolean TRUEFALSE(Object o) {
+        if(o.getClass()==boolean.class||o.getClass()==Boolean.class)return true;
         if(o.getClass()!=String.class){
             return false;
         }
@@ -175,10 +174,10 @@ class Mark {
         return str.equalsIgnoreCase("true")||str.equalsIgnoreCase("false");
     }
 
-    private void AppendLogic(Object o) {
+    private void AppendLogic(Object o) throws Exception {
         String str=(String)o;
         if(str.equalsIgnoreCase("and")){
-            if(!allowForOperation)throw new NumberFormatException();
+            if(!allowForOperation)  throw new Exception("error in expression after where ");
             allowForOperation=false;
             allowForData=true;
             while (DataStack.peek().getClass()!=Boolean.class&&PrimaryOperation(OperationStack.peek())){
@@ -188,7 +187,7 @@ class Mark {
             OperationStack.push("and");
 
         }else if (str.equalsIgnoreCase("or")){
-            if(!allowForOperation)throw new NumberFormatException();
+            if(!allowForOperation)  throw new Exception("error in expression after where ");
             allowForOperation=false;
             allowForData=true;
 
@@ -215,8 +214,7 @@ class Mark {
 
 
 
-    private void RemoveComparition() {
-        if(DataStack.peek().getClass()==Boolean.class)return;
+    private void RemoveComparition() throws Exception {
         Object y=DataStack.pop();
         Object x=DataStack.pop();
         char C=(char)OperationStack.pop();
@@ -238,8 +236,10 @@ class Mark {
             case '=':
                 if(isString(y,x)){
                     RemoveNot(((String)x).toLowerCase().compareTo(((String)y).toLowerCase())==0);
-                }else {
+                }else if((x.getClass()==int.class||x.getClass()==Integer.class)&&(y.getClass()==int.class||y.getClass()==Integer.class)) {
                     RemoveNot((int)x==(int)y);
+                }else if(TRUEFALSE(x)&&TRUEFALSE((y))){
+                    RemoveNot((boolean)x==(boolean)y);
                 }
                 break;
 
@@ -268,20 +268,27 @@ class Mark {
         RemoveNot(x||y);
     }
 
-    private boolean isString(Object o , Object o1){
+    private boolean isString(Object o , Object o1) throws Exception {
         if(o.getClass()==String.class){
             if(o1.getClass()==String.class){
                 return true;
             }
-            throw new NumberFormatException();
+            throw new Exception("not match types");
         }
         if(o.getClass()==Integer.class){
             if(o1.getClass()==Integer.class){
                 return false;
             }
-            throw new NumberFormatException();
+            throw new Exception("not match types");
         }
-        throw new NumberFormatException();
+        if(o.getClass()==boolean.class||o.getClass()==Boolean.class){
+            if(o1.getClass()==boolean.class||o1.getClass()==Boolean.class){
+                return false;
+            }
+            throw new Exception("not match types");
+        }
+
+        throw new Exception("not match types");
     }
 
     private boolean logicOperation(Object o) {
@@ -296,7 +303,7 @@ class Mark {
         return (char) o == '>' || (char) o == '<' || (char) o == '=';
     }
 
-    private void AppendOperation( Object object) {
+    private void AppendOperation( Object object) throws Exception {
         if(!allowForOperation)throw new NumberFormatException();
         allowForOperation=false;
         allowForData=true;
@@ -316,7 +323,7 @@ class Mark {
         OperationStack.push(object);
     }
 
-    private void RemovePrimaryOperation() {
+    private void RemovePrimaryOperation() throws Exception {
         int y=(int)DataStack.pop();
         int x=(int)DataStack.pop();
         char c =(char)OperationStack.pop();
@@ -331,8 +338,12 @@ class Mark {
                 DataStack.push(x*y);
                 break;
             case '/':
+                if(y==0){
+                    throw new Exception("Can't divide by 0");
+                }
                 DataStack.push(x/y);
                 break;
+
         }
 
 
@@ -346,7 +357,7 @@ class Mark {
         }
         return false;
     }
-    private void DeathStack(){
+    private void DeathStack() throws Exception {
         // at the end of expression to make tow stacks empty
         while (!OperationStack.empty()){
             Object o=OperationStack.peek();
@@ -355,10 +366,10 @@ class Mark {
             else  if((OperationStack.peek()).equals("and"))RemoveAnd();
             else if((OperationStack.peek()).equals("or"))RemoveOR();
             else if((OperationStack.peek()).equals("not"))RemoveNotDeath();
-            else throw new NumberFormatException();
+            else throw new Exception("Error in expression ");
         }
         if(DataStack.empty()||DataStack.peek().getClass()!=Boolean.class)
-            throw new NumberFormatException();
+            throw new Exception("Error in expression ");
     }
 
     private void RemoveNotDeath() {
