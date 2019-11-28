@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DB implements Database {
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[31m";
     private String path;
     private LinkedList<Table> tables = new LinkedList<>();
     private Mark mark = new Mark();
@@ -13,7 +15,9 @@ public class DB implements Database {
     private Class[] actualTypes;
     private String directoryOfDatabases = "DataBasesDirectory";
     public DB(){
+
     }
+
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
         File direct = new File(directoryOfDatabases);
@@ -26,7 +30,8 @@ public class DB implements Database {
             try {
                 tables = ReadTables.ReadTables(databaseName);
             }
-            catch (Exception ignored) {
+            catch (Exception e) {
+                System.out.println(ANSI_RED + e.getMessage() + ANSI_RESET);
             }
             return databaseName;
         }
@@ -42,8 +47,9 @@ public class DB implements Database {
             tables = new LinkedList<>();
             return databaseName;
         }
-        else return databaseName;
+        else return "not created";
     }
+
     private void dropDirectory(String path){ //this function can delete a directory and all its contents
         File oldData = new File(path);
         String[]entries = oldData.list();
@@ -58,11 +64,12 @@ public class DB implements Database {
         File directory = new File(path);
         return directory.mkdirs();
     }
+
     @Override
     public boolean executeStructureQuery(String query) throws SQLException {
         if(query.matches("(?i)^create .+")) { //starts with create
             LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
-            if (resultOfQuery == null ||(  resultOfQuery.size()!=3 &&  resultOfQuery.size()!=5) ){
+            if (resultOfQuery == null ||(  resultOfQuery.size() != 3 &&  resultOfQuery.size () != 5)){
                 throw new SQLException("Wrong create command");
             }
             if ((Boolean) resultOfQuery.get(0)) { //create DataBase
@@ -82,7 +89,7 @@ public class DB implements Database {
                 String[] namesOfColumns = (String[]) resultOfQuery.get(3);
                 String[] types = (String[]) resultOfQuery.get(4);
                 if(tableName == null || namesOfColumns[0] == null || types[0] == null ){
-                    System.out.println("Wrong table initialization");
+                    System.out.println(ANSI_RED + "Wrong table initialization!!" + ANSI_RESET);
                     return false;
                 }
                 Table t = new Table(tableName, namesOfColumns, types);
@@ -113,6 +120,7 @@ public class DB implements Database {
         }
         return true;
     }
+
     @Override
     public Object[][] executeQuery(String query) throws SQLException {
         LinkedList<Object> result = Parser.parseSelect(query);
@@ -133,7 +141,7 @@ public class DB implements Database {
             try{
                 references = mark.getData(condition,getTable(tableName));
             } catch (Exception e){
-                System.out.println(e.getMessage());
+                System.out.println(ANSI_RED + e.getMessage() + ANSI_RESET);
                 return null;
             }
         } else {
@@ -154,15 +162,9 @@ public class DB implements Database {
                 k++;
             }
         }
-        for(int i =0 ;i<arr.length;i++){
-            for(int j=0;j<arr[0].length;j++){
-                System.out.print(arr[i][j]+" | ");
-            }
-            System.out.println("");
-        }
         return arr;
-
     }
+
     @Override
     public int executeUpdateQuery(String query) throws Exception {
         if(query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$"))
@@ -173,6 +175,7 @@ public class DB implements Database {
             return this.excuteUpdate(query);
         return -1;
     }
+
     /**
      * @param
      *      query of type string the query
@@ -184,36 +187,46 @@ public class DB implements Database {
      * checks data types of the the insertions
      * rearrange the data to make it right to according to the scheme
      */
-    private int excuteInsert(String query) {
+    private int excuteInsert(String query) throws SQLException {
 
         data = Parser.parseInsert(query);
-        if(data == null)
+        if(data == null) {
+            System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
             return -1;
+        }
         Table operateOnTable = this.existance(data.get(0).toString());
 
         if(operateOnTable != null) {
             String[] headers = (String[])data.get(1);
             toLowerCaseConverter(headers, headers.length);
             String[] values = (String[])data.get(2);
-            if(headers.length != values.length) return -1;
+            if(headers.length != values.length) {
+                System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
+                return -1;
+            }
             actualHeaders = operateOnTable.getHeaders();
             toLowerCaseConverter(actualHeaders, actualHeaders.length);
             actualTypes = operateOnTable.getTypes();
             if(this.containsTheseHeaders(headers, values)) {
                 String[] strings = this.rearrange(headers, values);
-                //for(String c : strings) System.out.println(c);
                 operateOnTable.add(convertToObjects(strings));
+                XML.convertIntoXml(this.path, operateOnTable);
                 return 1;
             }
-            else
+            else {
+                System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
                 return -1;
+            }
+        } else {
+            System.out.println(ANSI_RED + "The table is still not being created!!" + ANSI_RESET);
+            return -1;
         }
-        return -1;
     }
+
     private Object[] convertToObjects(String[] str) {
         Object[] obj = new Object[str.length];
         int i = 0;
-        if(str[0] == null) System.out.println("str is null");
+        if(str[0] == null) System.out.println(ANSI_RED + "str is null" + ANSI_RESET);
         for(String temp : str) {
 
             if(temp.matches("^[0-9]+$"))
@@ -225,61 +238,104 @@ public class DB implements Database {
         }
         return obj;
     }
+
     private int excuteDelete(String query) throws Exception {
         data = Parser.parseDelete(query);
-        if(data == null)
-            return 0;
+        if(data == null) {
+            System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
+            return -1;
+        }
         Table deleteFromTable = this.existance(data.get(0).toString());
         if(deleteFromTable != null) {
             if(data.get(1).equals("")) {
                 int holeSize = deleteFromTable.getTable().size();
                 deleteFromTable.emptyTheTable();
+                try {
+                    XML.convertIntoXml(this.path, deleteFromTable);
+                } catch(SQLException e) {}
                 return holeSize;
             } else {
-
                 LinkedList<Object[]> deletedRows = mark.getData(data.get(1).toString(), deleteFromTable);
                 for(Object[] O : deletedRows) deleteFromTable.removeRecord(O);
+                try {
+                    XML.convertIntoXml(this.path, deleteFromTable);
+                } catch(SQLException e) {}
                 return deletedRows.size();
-
             }
-        }
+        } else
+            System.out.println(ANSI_RED + "The table is still not being created" + ANSI_RESET);
         return -1;
     }
+
     private int excuteUpdate(String query) throws Exception {
         LinkedList<Object[]> markedList = new LinkedList<>();
         data = Parser.parseUpdate(query);
-        if(data == null)
+        if(data == null) {
+            System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
             return 0;
+        }
         Table updatedTable = this.existance(data.get(0).toString());
         if(updatedTable != null) {
             String[] cols = (String[])data.get(2);
             String[] newValues = (String[])data.get(3);
             actualHeaders = updatedTable.getHeaders();
             actualTypes = updatedTable.getTypes();
-            if(cols.length != newValues.length) return -1;
+            if(cols.length != newValues.length) { 
+                System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
+                return -1;
+            }
             if(this.containsTheseHeaders(cols, newValues)) {
-                if(data.get(1).toString() != null) {
+                if(data.get(1).toString() != "") {
                     markedList = mark.getData(data.get(1).toString(), updatedTable);
-                    Object[] oldy;
-                    String[] oldValues = new String[cols.length];
-                    for(int i = 0; i < cols.length; ++i) {
-                        for(int j = 0; cols[j] != actualHeaders[j]; ++j);
-                        oldy = (Object[])markedList.get(i);
-                        oldValues[i] = (String)oldy[i];
-                    }
-                    for(int i = 0; i < cols.length; ++i) {
-                        updatedTable.updateRecord(cols[i], oldValues[i], newValues[i]);
+                    for(Object[] iterate : markedList) {
+                        Object[] newRowToBeExclusivelyAdded = this.createNewRows(iterate, cols, newValues);
+                        updatedTable.updateRecord(iterate, newRowToBeExclusivelyAdded);
+                        try {
+                            XML.convertIntoXml(this.path, updatedTable);
+                        } catch(SQLException e) {}
                     }
                 }
-                else
-                    updatedTable.updateHoleTable(this.rearrange(cols, newValues));
+                else {
+                    updatedTable.updateHoleTable(this.convertToObjects(newValues), this.getIndexes(cols));
+                    try {
+                        XML.convertIntoXml(this.path, updatedTable);
+                    } catch(SQLException e) {}
+                    return updatedTable.getSize();
+                }
+            } else {
+                System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
+                return -1;
             }
-        }
+        } else 
+            System.out.println(ANSI_RED + "The table is still not being created" + ANSI_RESET);
         return markedList.size();
     }
+
+    private Object[] createNewRows(final Object[] oldy, String[] cols, String[] newValues) {
+        LinkedList<String> actualHeadersAsList = new LinkedList<>(Arrays.asList(actualHeaders));
+        Object[] newie = new Object[oldy.length];
+        System.arraycopy(oldy, 0, newie, 0, oldy.length);
+        for(int i = 0, index; i < cols.length; ++i) {
+            index = actualHeadersAsList.indexOf(cols[i]);
+            newie[index] = newValues[i];
+        }
+        return newie;
+    }
+
+    private int[] getIndexes(String[] cols) {
+        LinkedList<String> actualHeadersAsList = new LinkedList<String>(Arrays.asList(actualHeaders));
+        int[] indexes = new int[cols.length];
+        for(int i = 0, j = 0; i < cols.length; ++i) {
+            if(actualHeadersAsList.contains(cols[i]))
+                indexes[j++] = actualHeadersAsList.indexOf(cols[i]) + 1;
+        }
+        return indexes;
+    }
+
     private Table existance(String tableName) {
             return this.getTable(tableName);
     }
+
     private Boolean containsTheseHeaders(String[] headers, String[] values) {
         LinkedList<String> actualHeadersAsList = new LinkedList<String>(Arrays.asList(actualHeaders));
         int i;
@@ -287,28 +343,29 @@ public class DB implements Database {
             if(actualHeadersAsList.contains(headers[i])) {
                 int index = actualHeadersAsList.indexOf(headers[i]);
                 if(actualTypes[index].toString().equals("(?i)(class java.lang.Integer)")) {
-                    System.out.println("im in outer integer");
-                    if(values[i].matches("(?i)[^a-z]$")){
-                        System.out.println("im in integer");
+                    if(values[i].matches("(?i)[0-9]$")){
                         continue;
                     }
                     else {
+                        System.out.println(ANSI_RED + "you may have a wrong input" + ANSI_RESET);
                         return false;
                     }
                 }
                 else if(actualTypes[index].toString().equals("(?i)(class java.lang.Boolean)")) {
-                    System.out.println("im in outer boolean");
                     if(values[i].matches("(?i).*(false)|(true).*")) {
-                        System.out.println("im in boolean");
                         continue;
                     }
-                    else return false;
+                    else { 
+                        System.out.println(ANSI_RED + "you may have a wrong input" + ANSI_RESET);
+                        return false;
+                    }
                 }
             } else
                 return false;
         }
         return i == headers.length;
     }
+
     private String[] rearrange(String[] headers, String[] values) {
         LinkedList<String> headersList = new LinkedList<String>(Arrays.asList(headers));
 
@@ -320,6 +377,7 @@ public class DB implements Database {
         }
         return dummy;
     }
+
     private Table getTable(String tableName){
         for (Table table : tables) {
             if (table.getName().equalsIgnoreCase(tableName)) {
@@ -328,6 +386,7 @@ public class DB implements Database {
         }
         return null;
     }
+
     String schema(){
         StringBuilder stringBuilder = new StringBuilder("");
         Iterator<Table> tableIterator = tables.listIterator();
@@ -339,6 +398,7 @@ public class DB implements Database {
         }
         return stringBuilder.toString();
     }
+
     private void addTable(Table table){
         this.tables.add(table);
     }
@@ -349,4 +409,5 @@ public class DB implements Database {
         for(int i = 0; i < length; ++i)
             arr[i] = arr[i].toLowerCase();
     }
+
 }
