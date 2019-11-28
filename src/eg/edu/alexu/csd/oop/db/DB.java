@@ -244,15 +244,16 @@ public class DB implements Database {
             return 0;
         Table deleteFromTable = this.existance(data.get(0).toString());
         if(deleteFromTable != null) {
-            if((String)data.get(1) == "") {
+            if(data.get(1).equals("")) {
+                int holeSize = deleteFromTable.getTable().size();
                 deleteFromTable.emptyTheTable();
-                return deleteFromTable.getTable().size();
+                return holeSize;
             } else {
+
                 LinkedList<Object[]> deletedRows = mark.getData(data.get(1).toString(), deleteFromTable);
-                System.out.println(deletedRows);
-                deleteFromTable.removeRecord(deletedRows);
-                System.out.println(deletedRows.size()+"  size deleted");
+                for(Object[] O : deletedRows) deleteFromTable.removeRecord(O);
                 return deletedRows.size();
+
             }
         }
         return -1;

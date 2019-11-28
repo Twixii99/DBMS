@@ -32,9 +32,9 @@ class Mark {
     private  Stack<Object> OperationStack=new Stack<>();
     private Stack<Object> DataStack=new Stack<>();
 
-    LinkedList<Object> getData(String Express, Table table) throws SQLException {
+    LinkedList<Object[]> getData(String Express, Table table) throws SQLException {
 
-        LinkedList<Object> correct=new LinkedList<>();
+        LinkedList<Object[]> correct=new LinkedList<>();
         String TempExpreetion=Spaces(Express);
 
         LinkedList<Object[]> Data = table.getTable();
@@ -56,7 +56,7 @@ class Mark {
                 correct.add(datum);
             }
         }
-        return correct;
+        return  correct;
     }
 
     private void ResetData() {
@@ -223,21 +223,21 @@ class Mark {
         switch (C){
             case '>':
                 if(isString(y,x)){
-                    RemoveNot(((String)x).compareTo((String) y)>0);
+                    RemoveNot(((String)x).toLowerCase().compareTo(((String)y).toLowerCase())>0);
                 }else {
                     RemoveNot((int)x>(int)y);
                 }
                 break;
             case '<':
                 if(isString(y,x)){
-                    RemoveNot(((String)x).compareTo((String) y)<0);
+                    RemoveNot(((String)x).toLowerCase().compareTo(((String)y).toLowerCase())<0);
                 }else {
                     RemoveNot((int)x<(int)y);
                 }
                 break;
             case '=':
                 if(isString(y,x)){
-                    RemoveNot(((String)x).compareTo((String) y)==0);
+                    RemoveNot(((String)x).toLowerCase().compareTo(((String)y).toLowerCase())==0);
                 }else {
                     RemoveNot((int)x==(int)y);
                 }

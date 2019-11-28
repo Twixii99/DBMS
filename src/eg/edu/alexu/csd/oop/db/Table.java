@@ -1,5 +1,6 @@
 package eg.edu.alexu.csd.oop.db;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -79,11 +80,12 @@ public class Table {
         }
     }
 
-    public void removeRecord(LinkedList<Object[]> removed) {
-        for(int i = 0; i < removed.size(); ++i) {
-            if(getTable().contains(removed.get(i)))
+    void removeRecord(LinkedList<Object> removed) {
+        for (Object o : removed) {
+            if (getTable().contains((Object[]) o)){
                 System.out.println("EXIST");
-            this.getTable().remove(removed.get(i));
+                this.getTable().remove((Object[]) o);
+            }
         }
     }
 
@@ -112,7 +114,7 @@ public class Table {
     }
 
     // as you know that we only update value by value
-    public void updateRecord(String header, Object oldValue, Object newValue) {
+    void updateRecord(String header, Object oldValue, Object newValue) {
         // get the index of header in headers
         int j = 0;
         for (j = 0; j < headers.length; j++) {
@@ -274,7 +276,13 @@ public class Table {
         return this.headers.length - 1;
     }
 
-    public void emptyTheTable(){
+    void emptyTheTable(){
         this.table = new LinkedList<>();
+    }
+
+    void removeRecord(Object[] record) {
+        for(int i =  getTable().size()-1 ; i>=0 ; i--){
+            if (Arrays.equals(record, getTable().get(i))) this.table.remove(i);
+        }
     }
 }
