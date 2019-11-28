@@ -4,31 +4,33 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-class Parser {
+public class Parser {
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_RED = "\u001B[31m";
     private static DB dummyDataBase = new DB();
     private Scanner scanner = new Scanner(System.in);
 
     Parser() throws Exception {
-            run();
-/*        create database d1
-        create table t1 values (name varchar, phone int, email varchar)
-        insert into t1 (name, phone, email) values ('abc', 123, 'abc@email.com')
-        insert into t1 (name, phone, email) values ('def', 456, 'def@email.com')
-        insert into t1 (name, phone, email) values ('ijk', 789, 'ijk@email.com')
-        select * from t1*/
+        run();
     }
 
-    private void run() throws Exception {
+    private void run() throws Exception{
         String command;
         do {
             command = scanner.nextLine();
             command = command.trim();
-            command = command.replace('\'','\"');
+            command = command.replaceAll("\'", "\"");
             try{
+                String ans = this.parse(command);
+                if(ans.equals("wrong input!! " + "\n"))
+                    System.out.print(ANSI_RED + ans + ANSI_RESET);
+                else
+                    System.out.print(ANSI_BLUE + ans + ANSI_RESET);
+            }/*try{
                 System.out.print(parse(command));
-            }
-            catch (Exception e){
-                System.out.println(e.getMessage());
+            }*/ catch (Exception e){
+                System.out.println(ANSI_RED + e.getMessage() + "!!" + ANSI_RESET);
             }
         } while (!command.equalsIgnoreCase(".quit"));
     }
@@ -48,12 +50,13 @@ class Parser {
             return "";
         } else if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$")){
             Object[][] selectedTable = dummyDataBase.executeQuery(query);
-            if(selectedTable==null)return null;
+            if(selectedTable == null) 
+                return null;
             StringBuilder stringBuilder = new StringBuilder();
             for (Object[] objects : selectedTable) {
                 for (int j = 0; j < objects.length; j++) {
                     stringBuilder.append(objects[j]);
-                    if (j < selectedTable.length) {
+                    if (j < objects.length-1) {
                         stringBuilder.append('|');
                     }
                 }
@@ -61,13 +64,12 @@ class Parser {
             }
             return stringBuilder.toString();
         } else if (query.matches("(?i)^\\.quit\\s*$")){
-            return "thanks for enjoying out DBMS";
+            return "thanks for enjoying our DBMS\n";
         } else if (query.matches("(?i)^\\.schema\\s*$")) {
             return dummyDataBase.schema();
         }
         return "wrong input!! " + "\n";
     }
-
 
     /*
      * takes the query as a parameter
@@ -82,10 +84,7 @@ class Parser {
      * like : "Boolean value = (Object[]) Parser.parseCreate(query).get(2);" (Boolean not boolean)
      * returns null if the query doesn't match
      */
-    static LinkedList<Object> parseCreate(String query) throws SQLException {
-        if(!query.matches("(?i)^\\s*CREATE\\s+DATABASE\\s+\\w+\\s*(DROP\\s+IF\\s+EXIST\\s*)?$")
-            && !(query.matches("(?i)^\\s*CREATE\\s+TABLE.+") ) ) return null;
-
+    public static LinkedList<Object> parseCreate(String query) throws SQLException {
         if (query.matches("(?i)^\\s*CREATE.+$")) {
             LinkedList<Object> result = new LinkedList<>();
             String query1 = query;
@@ -104,21 +103,20 @@ class Parser {
                     dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
                     dropIfExist = true;
                 }
-
                 result.add(dataBaseName);
                 result.add(dropIfExist);
                 return result;
             } else if (query1.matches("(?i)^\\s*TABLE\\s+.+")) { // done
                 // we are dealing with table
                 // example: "create table table_name values ( names varchar, phone int, email varchar);"
-                query1=query1.replace("(" ," (");
-                if(!query1.matches(".+\\)\\s*$") || query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*$")) return null;
+                if(!query1.matches("^.+\\)$"))
+                    return null;
                 result.add(false);
                 String tableName = query1;
-                tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s+(VALUES)?.+\\s*$", "");
+                tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s*[(].+\\s*$", "");
                 result.add(tableName);
                 result.add(false);
-                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s+" + tableName + "(?i)\\s+(VALUES)?\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*$", "").split(",");
+                String[] dataStyle = query1.replaceAll("(?i)^\\s*TABLE\\s*\\w+\\s*[(]\\s*", "").replaceAll("(?i)\\s*[)]\\s*$", "").split(",");
                 // dataStyle will look like "[name varchar, phone int, email varchar]"
                 String[] headers = new String[dataStyle.length];
                 String[] types = new String[dataStyle.length];
@@ -148,7 +146,7 @@ class Parser {
      * returns a linked list of objects
      * at index = 0, a Boolean Object it is true if it is to drop a database, and false if to drop a table
      * at index = 1, a String object to tell you the name of database or the name of the table
-     * put in your mind that you have to use type cast when deaboling with the return value
+     * put in your mind that you have to use type cast when dealing with the return value
      * like : "Boolean value = (Object[]) Parser.parseDrop(query).get(0);" (Boolean not boolean)
      * returns null if the query doesn't match
      */
@@ -296,7 +294,7 @@ class Parser {
             String query1 = query.replaceAll("(?i)^\\s*UPDATE\\s+",""); // remove update keyword
             String tableName = query1.replaceAll("(?i)\\s+SET\\s+.+$","");
             query1 = query1.replaceAll("(?i)^\\s*\\w+\\s*SET\\s*",""); // remove table name and set Keyword
-            String[] setters = new String[0];
+            String[] setters = new String[20];
             String condition = null;
             if (query1.matches("(?i)^.+\\s+WHERE\\s+.+\\s*$")) {
                 // contains where
@@ -316,6 +314,7 @@ class Parser {
             }
             columns = removeSpaces(columns);
             newValues = removeSpaces(newValues);
+            newValues[newValues.length-1] = newValues[newValues.length-1].replaceAll("where.+$", "");
             result.add(tableName);
             result.add(condition);
             result.add(columns);
