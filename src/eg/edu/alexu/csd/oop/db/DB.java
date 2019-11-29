@@ -20,6 +20,7 @@ public class DB implements Database {
 
     @Override
     public String createDatabase(String databaseName, boolean dropIfExists) {
+
         File direct = new File(directoryOfDatabases);
         if(!direct.exists()) direct.mkdirs();
         databaseName = directoryOfDatabases + System.getProperty("file.separator")+databaseName;
@@ -47,7 +48,7 @@ public class DB implements Database {
             tables = new LinkedList<>();
             return databaseName;
         }
-        else return "not created";
+        else return databaseName;
     }
 
     private void dropDirectory(String path){ //this function can delete a directory and all its contents
@@ -67,6 +68,7 @@ public class DB implements Database {
 
     @Override
     public boolean executeStructureQuery(String query) throws SQLException {
+        query = query.replaceAll("\'", "\"");
         if(query.matches("(?i)^create .+")) { //starts with create
             LinkedList<Object> resultOfQuery = Parser.parseCreate(query);
             if (resultOfQuery == null ||(  resultOfQuery.size() != 3 &&  resultOfQuery.size () != 5)){
@@ -123,6 +125,7 @@ public class DB implements Database {
 
     @Override
     public Object[][] executeQuery(String query) throws SQLException {
+        query = query.replaceAll("\'", "\"");
         LinkedList<Object> result = Parser.parseSelect(query);
         if (result == null){
             throw new SQLException("wrong input format");
@@ -167,6 +170,7 @@ public class DB implements Database {
 
     @Override
     public int executeUpdateQuery(String query) throws Exception {
+        query = query.replaceAll("\'", "\"");
         if(query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$"))
             return this.excuteInsert(query);
         if(query.matches("(?i)^\\s*DELETE\\s+FROM\\s.+$"))
@@ -229,8 +233,9 @@ public class DB implements Database {
         if(str[0] == null) System.out.println(ANSI_RED + "str is null" + ANSI_RESET);
         for(String temp : str) {
 
-            if(temp.matches("^[0-9]+$"))
+            if(temp.matches("^[0-9]+$")){
                 obj[i++] = Integer.parseInt(temp);
+            }
             else if(temp.matches("(?i).*true|false.*"))
                 obj[i++] = Boolean.parseBoolean(temp);
             else
@@ -280,9 +285,11 @@ public class DB implements Database {
             String[] newValues = (String[])data.get(3);
             actualHeaders = updatedTable.getHeaders();
             actualTypes = updatedTable.getTypes();
+            toLowerCaseConverter(cols,cols.length);
+            toLowerCaseConverter(actualHeaders,actualHeaders.length);
             if(cols.length != newValues.length) { 
                 System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
-                return -1;
+                return 0;
             }
             if(this.containsTheseHeaders(cols, newValues)) {
                 if(data.get(1).toString() != "") {
@@ -304,20 +311,21 @@ public class DB implements Database {
                 }
             } else {
                 System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
-                return -1;
+                return 0;
             }
         } else 
-            System.out.println(ANSI_RED + "The table is still not being created" + ANSI_RESET);
+            throw new SQLException("The table is still not being created");
         return markedList.size();
     }
 
     private Object[] createNewRows(final Object[] oldy, String[] cols, String[] newValues) {
+        Object[] news = convertToObjects(newValues);
         LinkedList<String> actualHeadersAsList = new LinkedList<>(Arrays.asList(actualHeaders));
         Object[] newie = new Object[oldy.length];
         System.arraycopy(oldy, 0, newie, 0, oldy.length);
         for(int i = 0, index; i < cols.length; ++i) {
             index = actualHeadersAsList.indexOf(cols[i]);
-            newie[index] = newValues[i];
+            newie[index] = news[i];
         }
         return newie;
     }

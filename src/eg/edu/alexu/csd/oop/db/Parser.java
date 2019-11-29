@@ -20,7 +20,6 @@ public class Parser {
         do {
             command = scanner.nextLine();
             command = command.trim();
-            command = command.replaceAll("\'", "\"");
             try{
                 String ans = this.parse(command);
                 if(ans.equals("wrong input!! " + "\n"))
@@ -109,8 +108,8 @@ public class Parser {
             } else if (query1.matches("(?i)^\\s*TABLE\\s+.+")) { // done
                 // we are dealing with table
                 // example: "create table table_name values ( names varchar, phone int, email varchar);"
-                if(!query1.matches("^.+\\)$"))
-                    return null;
+                query1=query1.replace("(" ," (");
+                if(!query1.matches(".+\\)\\s*$") || query1.matches("(?i)^\\s*TABLE\\s+\\w+\\s*$")) return null;
                 result.add(false);
                 String tableName = query1;
                 tableName = tableName.replaceAll("(?i)^\\s*TABLE\\s+", "").replaceAll("(?i)\\s*[(].+\\s*$", "");

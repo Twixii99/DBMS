@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class getExpression {
+public class getExpression {
     private LinkedList< Pair <String , Pair< Integer, Integer> > > Strings=new LinkedList<>();
     private LinkedList< Pair <String , Pair< Integer, Integer> > > Container=new LinkedList<>();
     private LinkedList <Object> Expresstion=new LinkedList<>();

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class XSD {
+public class XSD {
 
     private static LinkedList<String> Labels=new LinkedList<>();
     private static LinkedList<Class> TYPES=new LinkedList<>();

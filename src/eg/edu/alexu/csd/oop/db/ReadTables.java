@@ -9,7 +9,7 @@ import java.util.LinkedList;
  *  Table []t =ReadTables.ReadTables("");
  *  it return LinkedLIST of tables
  */
-class ReadTables {
+public class ReadTables {
 
     static LinkedList<Table> ReadTables(String Path) throws Exception {
         String[] tablesName=null;

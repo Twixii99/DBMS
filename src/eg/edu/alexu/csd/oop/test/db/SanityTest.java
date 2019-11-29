@@ -3,7 +3,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import eg.edu.alexu.csd.oop.db.DB;
 import org.junit.*;
 
 import eg.edu.alexu.csd.oop.db.Database;
@@ -26,7 +25,7 @@ public class SanityTest {
 
 	@Test
 	public void testWrongQuery() {
-		DB db = new DB();
+		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
 
 		try {
 			createDatabase(db, "TestDB", true);
@@ -106,7 +105,7 @@ public class SanityTest {
 	@Test
 	public void testCaseInsensitive()
 	{
-		DB db = new DB();
+		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
 		createDatabase(db, "TestDB", true);
 
 		try {
@@ -127,7 +126,7 @@ public class SanityTest {
 	@Test
 	public void testScenario_1()
 	{
-		DB db = new DB();
+		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
 
 		try {
 			boolean created = db.executeStructureQuery("CREATE DATABASE TestDB");
@@ -158,7 +157,7 @@ public class SanityTest {
 	@Test
 	public void testScenario_2()
 	{
-		DB db = new DB();
+		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
 
 		try {
 			boolean created = db.executeStructureQuery("CREATE DATABASE TestDB");
@@ -203,7 +202,7 @@ public class SanityTest {
 	@Test
 	public void testScenario_3()
 	{
-		DB db = new DB();
+		Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
 
 		try {
 			createDatabase(db, "TestDB", true);

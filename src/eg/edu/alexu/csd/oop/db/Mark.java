@@ -1,6 +1,5 @@
 package eg.edu.alexu.csd.oop.db;
 
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -14,7 +13,7 @@ import java.util.regex.Pattern;
  *          it return  a LinkedList of object
  *
  */
-class Mark {
+public class Mark {
 
     private String[] column;
     private Class[] Types;

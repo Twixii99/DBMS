@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
-class XML {
+public class XML {
     static boolean convertIntoXml(String Path, Table table) throws SQLException {
 
         File file =new File(Path);

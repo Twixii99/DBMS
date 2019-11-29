@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import eg.edu.alexu.csd.oop.db.DB;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,7 +35,7 @@ public class SmokeTest {
     @Test
     public void testCreateAndOpenAndDropDatabase() {
         File dummy = null;
-        DB db = new DB();
+        Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         {
             File dbDir = createDatabase_static(db, "SaMpLe", true);
             String files[] = dbDir.list();
@@ -64,8 +63,7 @@ public class SmokeTest {
 
     @Test
     public void testCreateTable() {
-    	//Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
-    	DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         File dbDir = createDatabase(db, "TestDB_Create", true);
         try {
             String filesBefore[] = dbDir.list();
@@ -93,7 +91,7 @@ public class SmokeTest {
     
     @Test
     public void testCreateTableWithoutDB() {
-    	DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         try {
             db.executeStructureQuery("CREATE TABLE table_name2(column_name1 varchar, column_name2 int, column_name3 varchar)");
             Assert.fail("Table created without database!!");
@@ -103,7 +101,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithoutColumnNames() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name3(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -116,7 +114,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithColumnNames() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name4(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -129,7 +127,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithWrongColumnNames() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name5(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -141,7 +139,7 @@ public class SmokeTest {
 
     @Test
     public void testInsertWithWrongColumnCount() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Insert", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name6(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -153,7 +151,7 @@ public class SmokeTest {
 
     @Test
     public void testUpdate() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name7(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -172,7 +170,7 @@ public class SmokeTest {
     
     @Test
     public void testConditionalUpdate() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name8(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -191,7 +189,7 @@ public class SmokeTest {
 
     @Test
     public void testUpdateEmptyOrInvalidTable() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name9(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -211,7 +209,7 @@ public class SmokeTest {
     
     @Test
     public void testDelete() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name10(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -230,7 +228,7 @@ public class SmokeTest {
     
     @Test
     public void testConditionalDelete() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Update", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name11(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -249,7 +247,7 @@ public class SmokeTest {
 
     @Test
     public void testSelect() {
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Select", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name12(column_name1 varchar, column_name2 int, column_name3 varchar)");
@@ -272,8 +270,7 @@ public class SmokeTest {
     
     @Test
     public void testConditionalSelect() {
-    	//Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
-        DB db = new DB();
+    	Database db = (Database)TestRunner.getImplementationInstanceForInterface(Database.class);
         createDatabase(db, "TestDB_Select", true);
         try {
             db.executeStructureQuery("CREATE TABLE table_name13(column_name1 varchar, column_name2 int, column_name3 varchar)");
