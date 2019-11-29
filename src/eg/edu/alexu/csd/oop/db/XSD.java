@@ -50,11 +50,17 @@ public class XSD {
         }
 
     }
-    static void getXSD(String Path, String Table) throws IOException {
+    static void getXSD(String Path, String Table) throws Exception {
 
         Labels=new LinkedList<>();
         TYPES=new LinkedList<>();
-        String str = new String(Files.readAllBytes(Paths.get(new File(Path+  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
+        String str="";
+        try {
+            str= new String(Files.readAllBytes(Paths.get(new File(Path+  System.getProperty("file.separator") + Table +  System.getProperty("file.separator") + Table + ".xsd").getAbsolutePath())));
+
+        }catch (Exception e ){
+            throw new Exception("XSD FILE OF PATH "+ Path +" doesn't found");
+        }
 
         Pattern pattern=Pattern.compile("(.*)(<xs:complexType name = 'record'>)(.*)");
 

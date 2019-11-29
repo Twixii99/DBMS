@@ -5,6 +5,22 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DB implements Database {
+    private volatile static DB obj;
+    public static DB getInstance()
+    {
+        if (obj == null)
+        {
+            // To make thread safe 
+            synchronized (DB.class)
+            {
+                // check again as multiple threads 
+                // can reach above step 
+                if (obj==null)
+                    obj = new DB();
+            }
+        }
+        return obj;
+    }
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
     private String path;
@@ -14,8 +30,8 @@ public class DB implements Database {
     private String[] actualHeaders;
     private Class[] actualTypes;
     private String directoryOfDatabases = "DataBasesDirectory";
-    public DB(){
 
+    private DB(){
     }
 
     @Override
@@ -58,6 +74,9 @@ public class DB implements Database {
             for (String s : entries) {
                 dropDirectory(oldData.getPath() + System.getProperty("file.separator") + s);
             }
+        } else {
+            if(!path.contains(".xml")&&!path.contains(".xsd"))
+                System.out.println(ANSI_RED + "Data base doesn't exist!!" + ANSI_RESET);
         }
         oldData.delete();
     }
@@ -191,7 +210,7 @@ public class DB implements Database {
      * checks data types of the the insertions
      * rearrange the data to make it right to according to the scheme
      */
-    private int excuteInsert(String query) throws SQLException {
+    private int excuteInsert(String query) throws SQLException, Exception{
 
         data = Parser.parseInsert(query);
         if(data == null) {
@@ -227,12 +246,12 @@ public class DB implements Database {
         }
     }
 
-    private Object[] convertToObjects(String[] str) {
+    private Object[] convertToObjects(String[] str) throws Exception {
         Object[] obj = new Object[str.length];
         int i = 0;
-        if(str[0] == null) System.out.println(ANSI_RED + "str is null" + ANSI_RESET);
         for(String temp : str) {
-
+            if(temp == null)
+                throw new Exception("Bad Input!!");
             if(temp.matches("^[0-9]+$")){
                 obj[i++] = Integer.parseInt(temp);
             }
@@ -252,6 +271,9 @@ public class DB implements Database {
         }
         Table deleteFromTable = this.existance(data.get(0).toString());
         if(deleteFromTable != null) {
+            if(deleteFromTable.getTable().size() == 0) {
+                throw new Exception("This operation is denied for an empty table!!");
+            }
             if(data.get(1).equals("")) {
                 int holeSize = deleteFromTable.getTable().size();
                 deleteFromTable.emptyTheTable();
@@ -281,13 +303,17 @@ public class DB implements Database {
         }
         Table updatedTable = this.existance(data.get(0).toString());
         if(updatedTable != null) {
+            if(updatedTable.getTable().size() == 0) {
+                return 0;
+         //       throw new Exception("This operation is denied for an empty table!!");
+            }
             String[] cols = (String[])data.get(2);
             String[] newValues = (String[])data.get(3);
             actualHeaders = updatedTable.getHeaders();
             actualTypes = updatedTable.getTypes();
             toLowerCaseConverter(cols,cols.length);
             toLowerCaseConverter(actualHeaders,actualHeaders.length);
-            if(cols.length != newValues.length) { 
+            if(cols.length != newValues.length) {
                 System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
                 return 0;
             }
@@ -313,12 +339,12 @@ public class DB implements Database {
                 System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
                 return 0;
             }
-        } else 
+        } else
             throw new SQLException("The table is still not being created");
         return markedList.size();
     }
 
-    private Object[] createNewRows(final Object[] oldy, String[] cols, String[] newValues) {
+    private Object[] createNewRows(final Object[] oldy, String[] cols, String[] newValues) throws Exception {
         Object[] news = convertToObjects(newValues);
         LinkedList<String> actualHeadersAsList = new LinkedList<>(Arrays.asList(actualHeaders));
         Object[] newie = new Object[oldy.length];
@@ -341,7 +367,7 @@ public class DB implements Database {
     }
 
     private Table existance(String tableName) {
-            return this.getTable(tableName);
+        return this.getTable(tableName);
     }
 
     private Boolean containsTheseHeaders(String[] headers, String[] values) {
@@ -363,7 +389,7 @@ public class DB implements Database {
                     if(values[i].matches("(?i).*(false)|(true).*")) {
                         continue;
                     }
-                    else { 
+                    else {
                         System.out.println(ANSI_RED + "you may have a wrong input" + ANSI_RESET);
                         return false;
                     }

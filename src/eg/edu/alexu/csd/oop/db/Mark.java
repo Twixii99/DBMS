@@ -122,7 +122,7 @@ public class Mark {
         }else if(o.getClass()==Character.class&&(char)o=='('){
             if(allowForData){
                 OperationStack.push(o);
-            }else throw new NumberFormatException();
+            }else throw new Exception("error in expression after where");
         }else if(o.getClass()==Character.class&&(char)o==')'){
             DeathPrantetes();
             allowForOperation=true;
@@ -153,7 +153,7 @@ public class Mark {
             else  throw new Exception("error in expression after where");
         }
 
-        if((char)OperationStack.peek()!='('){
+        if(OperationStack.empty()||(char)OperationStack.peek()!='('){
             throw new Exception("not found ( ");
         }
         OperationStack.pop();
@@ -303,7 +303,7 @@ public class Mark {
     }
 
     private void AppendOperation( Object object) throws Exception {
-        if(!allowForOperation)throw new NumberFormatException();
+        if(!allowForOperation)throw new Exception("error in expression after where");
         allowForOperation=false;
         allowForData=true;
 

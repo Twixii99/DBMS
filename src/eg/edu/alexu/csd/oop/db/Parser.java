@@ -5,15 +5,31 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Parser {
+    private volatile static Parser obj;
+
+    public static Parser getInstance() throws Exception {
+        if (obj == null)
+        {
+            // To make thread safe 
+            synchronized (Parser.class)
+            {
+                // check again as multiple threads 
+                // can reach above step 
+                if (obj==null)
+                    obj = new Parser();
+            }
+        }
+        return obj;
+    }
+    private Parser() throws Exception {
+        run();
+    }
+
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
     private static final String ANSI_RED = "\u001B[31m";
-    private static DB dummyDataBase = new DB();
+    private static DB dummyDataBase = DB.getInstance();
     private Scanner scanner = new Scanner(System.in);
-
-    Parser() throws Exception {
-        run();
-    }
 
     private void run() throws Exception{
         String command;
@@ -22,14 +38,14 @@ public class Parser {
             command = command.trim();
             try{
                 String ans = this.parse(command);
-                if(ans.equals("wrong input!! " + "\n"))
+                if(ans == null)
+                    continue;
+                if(ans.equals("Bad Input!! " + "\n"))
                     System.out.print(ANSI_RED + ans + ANSI_RESET);
                 else
                     System.out.print(ANSI_BLUE + ans + ANSI_RESET);
-            }/*try{
-                System.out.print(parse(command));
-            }*/ catch (Exception e){
-                System.out.println(ANSI_RED + e.getMessage() + "!!" + ANSI_RESET);
+            } catch (Exception e){
+                System.out.println(ANSI_RED + e.getMessage() + ANSI_RESET);
             }
         } while (!command.equalsIgnoreCase(".quit"));
     }
@@ -37,19 +53,19 @@ public class Parser {
     // takes the query as a parameter, and returns the message back to run(); to show it to the console
     private String parse(String query) throws Exception {
         // for databases creation, for example "create database database1;"
-        if (query.matches("(?i)^\\s*(CREATE|Drop).+$")) {
+        if (query.matches("(?i)^\\s*(CREATE|Drop)\\s+.+$")) {
             // we are dealing with create
             dummyDataBase.executeStructureQuery(query);
             return "";
-        } else if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s.+$") ||
-                query.matches("(?i)^\\s*DELETE\\s+FROM\\s.+$") ||
+        } else if (query.matches("(?i)^\\s*INSERT\\s+INTO\\s+.+$") ||
+                query.matches("(?i)^\\s*DELETE\\s+FROM\\s+.+$") ||
                 query.matches("(?i)^\\s*UPDATE\\s+.+$")) {
             // we are dealing with execute structure query statement
             dummyDataBase.executeUpdateQuery(query);
             return "";
         } else if (query.matches("(?i)^\\s*SELECT\\s+.+\\s+FROM\\s.+$")){
             Object[][] selectedTable = dummyDataBase.executeQuery(query);
-            if(selectedTable == null) 
+            if(selectedTable == null)
                 return null;
             StringBuilder stringBuilder = new StringBuilder();
             for (Object[] objects : selectedTable) {
@@ -67,7 +83,7 @@ public class Parser {
         } else if (query.matches("(?i)^\\.schema\\s*$")) {
             return dummyDataBase.schema();
         }
-        return "wrong input!! " + "\n";
+        return "Bad Input!! " + "\n";
     }
 
     /*
@@ -101,7 +117,8 @@ public class Parser {
                     // for example "create database drop IF NOT EXIST batabase1;"
                     dataBaseName = query1.replaceAll("(?i)\\s+DROP\\s+IF\\s+EXIST\\s*$", "");
                     dropIfExist = true;
-                }
+                } else
+                    System.out.println(ANSI_RED + "Bad Input!!" + ANSI_RESET);
                 result.add(dataBaseName);
                 result.add(dropIfExist);
                 return result;

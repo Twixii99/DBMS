@@ -45,7 +45,7 @@ public class getExpression {
             if(iSALLOWEDCHAR(first.charAt(0))){
                 return first.charAt(0);
             }
-            throw new SQLException(first +" isn't a column in the table ");
+            throw new SQLException("\"" + first + "\"" + " isn't a column in the table ");
         }
         if(AlOWSTRING(first)){
             return first;
@@ -53,7 +53,7 @@ public class getExpression {
         if(IsBool(first)){
             return Boolean.parseBoolean(first.toLowerCase());
         }
-        throw new SQLException(first +" isn't a column in the table ");
+        throw new SQLException("\"" + first + "\"" + " isn't a column in the table ");
     }
 
     private boolean IsBool(String first) {
