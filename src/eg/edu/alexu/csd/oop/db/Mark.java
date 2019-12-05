@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+ 
 /**
  *          to call this class
  *          use it
@@ -14,61 +14,61 @@ import java.util.regex.Pattern;
  *
  */
 public class Mark {
-
+ 
     private String[] column;
     private Class[] Types;
     private Object[] Data;
     private String Expression ;
     private Boolean allowForData;
     private Boolean allowForOperation;
-
+ 
     private Object[] operation;
-
+ 
     private char[] primaryOperation ={'+','-','*','/'};
-
+ 
     private char[] AllowedChar ={'+','-','*','/','(',')','<','>','='};
-
+ 
     private  Stack<Object> OperationStack=new Stack<>();
     private Stack<Object> DataStack=new Stack<>();
-
+ 
     LinkedList<Object[]> getData(String Express, Table table) throws Exception {
-
+ 
         LinkedList<Object[]> correct=new LinkedList<>();
         String TempExpreetion=Spaces(Express);
-
+ 
         LinkedList<Object[]> Data = table.getTable();
-
+ 
         column=table.getHeaders();
         Types=table.getTypes();
-
+ 
         for (Object[] datum : Data) {
             ResetData();
-
+ 
             this.Data = datum;
             Expression = TempExpreetion;
-
+ 
             Mark();
             operation = new getExpression().GetExpression(Expression);
             Calc();
-
+ 
             if ((DataStack.peek().getClass() == boolean.class || DataStack.peek().getClass() == Boolean.class) && ((boolean) DataStack.peek())) {
                 correct.add(datum);
             }
         }
         return  correct;
     }
-
+ 
     private void ResetData() {
         allowForData=true;
         allowForOperation=false;
         OperationStack=new Stack<>();
         DataStack=new Stack<>();
     }
-
+ 
     private String Spaces(String express) {
         StringBuilder s = new StringBuilder(" ");
         int numberOfPranthes=0;
-
+ 
         for(int i=0;i<express.length();i++){
             if(express.charAt(i)=='\"'){
                 numberOfPranthes++;
@@ -91,24 +91,24 @@ public class Mark {
                     b=true;
                     break;
                 }
-
+ 
             }
             if(b)continue;
             s.append(express.charAt(i));
-
+ 
         }
         s.append(" ");
         return s.toString();
     }
-
-
+ 
+ 
     private void Calc() throws Exception {
         for (Object o : operation) {
             Distibute(o);
         }
         DeathStack();
     }
-
+ 
     private void Distibute(Object o) throws Exception {
         if(PrimaryOperation(o)||comparitionOperation(o))
         {
@@ -140,7 +140,7 @@ public class Mark {
             }
         }
     }
-
+ 
     private void DeathPrantetes() throws Exception {
         while (!OperationStack.empty()&&(OperationStack.peek().getClass()!=Character.class||(char)OperationStack.peek()!='(')){
             Object o=OperationStack.peek();
@@ -152,7 +152,7 @@ public class Mark {
             }
             else  throw new Exception("error in expression after where");
         }
-
+ 
         if(OperationStack.empty()||(char)OperationStack.peek()!='('){
             throw new Exception("not found ( ");
         }
@@ -163,7 +163,7 @@ public class Mark {
             else  throw new Exception("expected bool after not  ");
         }
     }
-
+ 
     private boolean TRUEFALSE(Object o) {
         if(o.getClass()==boolean.class||o.getClass()==Boolean.class)return true;
         if(o.getClass()!=String.class){
@@ -172,7 +172,7 @@ public class Mark {
         String str=(String)o;
         return str.equalsIgnoreCase("true")||str.equalsIgnoreCase("false");
     }
-
+ 
     private void AppendLogic(Object o) throws Exception {
         String str=(String)o;
         if(str.equalsIgnoreCase("and")){
@@ -184,12 +184,12 @@ public class Mark {
             }
             RemoveComparition();
             OperationStack.push("and");
-
+ 
         }else if (str.equalsIgnoreCase("or")){
             if(!allowForOperation)  throw new Exception("error in expression after where ");
             allowForOperation=false;
             allowForData=true;
-
+ 
             while (DataStack.peek().getClass()!=Boolean.class&&PrimaryOperation(OperationStack.peek())){
                 RemovePrimaryOperation();
             }
@@ -198,7 +198,7 @@ public class Mark {
                 RemoveAnd();
             }
             OperationStack.push("or");
-
+ 
         }
         else {
             allowForOperation=false;
@@ -210,13 +210,19 @@ public class Mark {
             OperationStack.push("not");
         }
     }
-
-
-
+ 
+ 
+ 
     private void RemoveComparition() throws Exception {
+        if(OperationStack.empty()||OperationStack.peek().getClass()!=Character.class)return;
         Object y=DataStack.pop();
         Object x=DataStack.pop();
-        char C=(char)OperationStack.pop();
+        char C ;
+        if(OperationStack.peek().getClass()==Character.class){
+            C=(Character) OperationStack.pop();
+        }else {
+            C=((String)OperationStack.pop()).charAt(0);
+        }
         switch (C){
             case '>':
                 if(isString(y,x)){
@@ -241,7 +247,7 @@ public class Mark {
                     RemoveNot((boolean)x==(boolean)y);
                 }
                 break;
-
+ 
         }
     }
     private void RemoveAnd() {
@@ -250,15 +256,18 @@ public class Mark {
         OperationStack.pop();
         RemoveNot(x&&y);
     }
-
+ 
     private void RemoveNot(boolean b){
-
+ 
         if(!OperationStack.empty()&&OperationStack.peek().equals("not")){
             OperationStack.pop();
             DataStack.push(!b);
             return;
         }
+ 
+ 
         DataStack.push(b);
+        if(!OperationStack.empty()&&OperationStack.peek().equals("and"))RemoveAnd();
     }
     private void RemoveOR() {
         boolean x=(boolean)DataStack.pop();
@@ -266,7 +275,7 @@ public class Mark {
         OperationStack.pop();
         RemoveNot(x||y);
     }
-
+ 
     private boolean isString(Object o , Object o1) throws Exception {
         if(o.getClass()==String.class){
             if(o1.getClass()==String.class){
@@ -286,32 +295,32 @@ public class Mark {
             }
             throw new Exception("not match types");
         }
-
+ 
         throw new Exception("not match types");
     }
-
+ 
     private boolean logicOperation(Object o) {
         return (o.getClass()==String.class&&(((String)o).toLowerCase().equals("and")||
                 ((String)o).toLowerCase().equals("or")||
                 ((String)o).toLowerCase().equals("not")
         ));
     }
-
+ 
     private boolean comparitionOperation(Object o) {
         if(o.getClass()!=Character.class)return false;
         return (char) o == '>' || (char) o == '<' || (char) o == '=';
     }
-
+ 
     private void AppendOperation( Object object) throws Exception {
         if(!allowForOperation)throw new Exception("error in expression after where");
         allowForOperation=false;
         allowForData=true;
-
+ 
         if(OperationStack.empty()||!PrimaryOperation(OperationStack.peek())){
             OperationStack.push(object);
             return;
         }
-
+ 
         if(((char)object=='*'||(char)object=='/'))
             while (!OperationStack.empty()&&((char)OperationStack.peek()=='*'||(char)OperationStack.peek()=='/'))
                 RemovePrimaryOperation();
@@ -321,7 +330,7 @@ public class Mark {
         }
         OperationStack.push(object);
     }
-
+ 
     private void RemovePrimaryOperation() throws Exception {
         int y=(int)DataStack.pop();
         int x=(int)DataStack.pop();
@@ -342,10 +351,10 @@ public class Mark {
                 }
                 DataStack.push(x/y);
                 break;
-
+ 
         }
-
-
+ 
+ 
     }
     private boolean PrimaryOperation(Object object)
     {
@@ -370,13 +379,13 @@ public class Mark {
         if(DataStack.empty()||DataStack.peek().getClass()!=Boolean.class)
             throw new Exception("Error in expression ");
     }
-
+ 
     private void RemoveNotDeath() {
         boolean b=(boolean)DataStack.pop();
         OperationStack.pop();
         DataStack.push(!b);
     }
-
+ 
     private void Mark()
     {
         for(int i=0;i<column.length;i++)
@@ -408,13 +417,13 @@ public class Mark {
             if(FindBefore&&FindAfter&&bound)
             {
                 Expression = new StringBuilder(Expression).replace(begin+1,end,ReplaceWith).toString();
-
+ 
             }
             return true;
         }
         return false;
     }
-
+ 
     private boolean after(int x) {
         for(int i = x; i< Expression.length(); i++){
             if(Expression.charAt(i)==' ')continue;
@@ -422,7 +431,7 @@ public class Mark {
         }
         return true;
     }
-
+ 
     private boolean before(int x){
         for(int i=x-1;i>=0;i--){
             if(Expression.charAt(i)==' ')continue;

@@ -28,19 +28,26 @@ public class Parser {
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BLUE = "\u001B[34m";
     private static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_PURPLE = "\u001B[45m";
     private static DB dummyDataBase = DB.getInstance();
     private Scanner scanner = new Scanner(System.in);
 
     private void run() throws Exception{
+        // to make ctrl + l 
+        // for screen clearing
+        System.out.print("\033[H\033[2J");  
+        System.out.flush();
+
         String command;
         do {
+            System.out.print(ANSI_PURPLE + "Death_Team >>> " + ANSI_RESET);
             command = scanner.nextLine();
             command = command.trim();
             try{
-                String ans = this.parse(command);
+                String ans = this.parse(command.replaceAll(";", ""));
                 if(ans == null)
                     continue;
-                if(ans.equals("Bad Input!! " + "\n"))
+                else if(ans.equals("Bad Input!! " + "\n"))
                     System.out.print(ANSI_RED + ans + ANSI_RESET);
                 else
                     System.out.print(ANSI_BLUE + ans + ANSI_RESET);

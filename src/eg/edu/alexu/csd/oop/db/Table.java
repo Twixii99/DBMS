@@ -30,7 +30,7 @@ public class Table {
     }
 
     // return true if added successfully, added innerID column in the first, given to the record when it is added (recorded)
-    public boolean add(Object[] record) throws Exception {
+    public Boolean add(Object[] record) throws Exception {
         if (checkRecordFormat(record)) {
             Object[] tempRecord = new Object[record.length + 1];
             tempRecord[0] = lastRecordId++;
@@ -41,23 +41,30 @@ public class Table {
         return false;
     }
 
+    public void addX(Object[] record) {
+        Object[] tempRecord = new Object[record.length + 1];
+        tempRecord[0] = lastRecordId++;
+        System.arraycopy(record, 0, tempRecord, 1, record.length);
+        table.add(tempRecord);
+    }
+
     // returns false if the record format doesn't match what is in the table
     private boolean checkRecordFormat(Object[] record) throws Exception {
         if (record.length == headers.length - 1) {
             for (int i = 0; i < record.length; i++) {
                 if ((types[i + 1].equalsIgnoreCase("Integer"))) {
                     if (!(record[i] instanceof Integer)) {
-                        throw new Exception ("not matched inputs");
+                        throw new Exception ("not matched inputs!!");
                     }
                 } else if ((types[i + 1].equalsIgnoreCase("String"))) {
                     if (!(record[i] instanceof String)) {
-                        throw new Exception ("not matched inputs");
+                        throw new Exception ("not matched inputs!!");
                     }
                     if(!((String)record[i]).matches("(?i)^\".+\"$"))
                         throw new Exception ("Expected a string type input has format \"Input\"");
                 } else if ((types[i + 1].equalsIgnoreCase("Boolean"))) {
                     if (!(record[i] instanceof Boolean)) {
-                        throw new Exception ("not matched inputs");
+                        throw new Exception ("not matched inputs!!");
                     }
                 }
             }

@@ -26,6 +26,10 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 
 public class XML {
+
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[31m";
+
     static boolean convertIntoXml(String Path, Table table) throws SQLException {
 
         File file =new File(Path);
@@ -126,7 +130,7 @@ public class XML {
                 data.add(row);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(ANSI_RED + e.getMessage() + ANSI_RESET);
             e.printStackTrace();
         }
         return data;
@@ -140,10 +144,10 @@ public class XML {
             validator = schema.newValidator();
             validator.validate(new StreamSource(new File(xmlPath)));
         } catch (IOException e){
-            System.out.println("Exception: "+e.getMessage());
+            System.out.println(ANSI_RED  + "Exception: " + e.getMessage() + ANSI_RESET);
             return false;
         }catch(SAXException e1){
-            System.out.println("SAX Exception: "+e1.getMessage());
+            System.out.println(ANSI_RED + "SAX Exception: "+e1.getMessage() + ANSI_RESET);
             return false;
         }
 
